@@ -24,12 +24,6 @@ Sphere spheres[] = {
 };
 int numSpheres = 9;
 
-// inline bool intersect(const Ray &r, double &t, int &id){
-//   double n=sizeof(spheres)/sizeof(Sphere), d, inf=t=1e20;
-//   for(int i=int(n);i--;) if((d=spheres[i].intersect(r))&&d<t){t=d;id=i;}
-//   return t<inf;
-// }
-
 // clamp between 0 and 1
 inline double clamp(double x) { return x > 1 ? 1 : x < 0 ? 0 : x; }
 
@@ -79,8 +73,8 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive=
 	
 	const Sphere &hitSphere = spheres[id];
 
-	// if(depth > MAX_DEPTH)
-	// 	return Vec();
+	if(depth > MAX_DEPTH)
+		return Vec();
 
 	// get surface point
 	Vec hitPoint = ray.origin + ray.direction * t;
@@ -182,7 +176,65 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive=
 	
 	// REFR
 	else{
-		// TBD: Glass	
+		
+		// Glass: Reflect & Refract
+
+		Ray reflectionRay(hitPoint, ray.direction - hitPointNormal * 2 * hitPointNormal.dot(ray.direction));
+
+		bool into = hitPointNormal.dot(orientedHitPointNormal) > 0; // ray should going in?
+
+		double nc = 1; // c is the speed of light in vacuum
+		double nt = 1.5; // t is the phase velocity of light in the medium
+
+		// refractiveIndex, glass IOR ~= 1.5
+		// Check: https://en.wikipedia.org/wiki/Crown_glass_(optics)
+		// Not account for dispersion (to account these, vary index by wavelength)
+		double nnt = into ? nc / nt : nt / nc; 		
+		
+		double ddn = ray.direction.dot(orientedHitPointNormal);
+		double cos2t; // cos(sida_b)
+
+		// if total internel reflection, reflect
+		// happens when angle is too shallow
+		// cos2t = cos(sida_b) ^ 2
+		cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
+		if(cos2t < 0)
+		{
+			return hitSphere.emission + color.mult(radiance(reflectionRay, depth, Xi));
+		}
+
+		// other wise, choose refraction or reflection using fresnel
+		// Check Slide: page 72
+		Vec refractionDir = (ray.direction * nnt - hitPointNormal * ((into ? 1 : -1) * (ddn * nnt + sqrt(cos2t)))).norm();
+
+  		double a = nt - nc;
+		double b = nt + nc;
+		double R0 = a * a / (b * b); // Reflectance at normal incidence based on IOR
+		double c = 1 - (into ? -ddn : refractionDir.dot(hitPointNormal)); // 1 - cos(theta)
+
+		double Re = R0 + (1 - R0) * c * c * c * c * c; // Fresnel Reflectance
+		double Tr = 1 - Re;
+
+		double p = 0.25 + 0.5 * Re; // probably of reflecting
+
+		double Rp = Re / p; 
+		double Tp = Tr / (1 - p);
+
+		// Russuan Roulette
+		if(depth > 2)
+		{
+			if(erand48(Xi) < p)
+			{
+				return hitSphere.emission + radiance(reflectionRay, depth, Xi) * Rp;
+			}
+			else 
+			{
+				return hitSphere.emission + radiance(Ray(hitPoint, refractionDir), depth, Xi) * Tp;
+			}
+		}
+		else{
+				return hitSphere.emission + radiance(reflectionRay, depth, Xi) * Re +  radiance(Ray(hitPoint, refractionDir), depth, Xi) * Tr;
+		}
 	}
 
 }
