@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+*.swo
+*.swp
+
+pt
+
+model

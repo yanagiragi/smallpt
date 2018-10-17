@@ -1,17 +1,9 @@
 #ifndef SPHERE_HPP
 #define SPHERE_HPP
 
-#include "Ray.hpp"
-#include "Vec.hpp"
+#include "Shape.hpp"
 
-const double epsilon = 1e-4;
-
-enum ReflectType
-{
-	DIFF, SPEC, REFR
-};
-
-class Sphere
+class Sphere : public Shape
 {
 	public:
 
@@ -19,13 +11,8 @@ class Sphere
 
 		Vec origin;
 
-		Vec emission;
 
-		Vec color;
-
-		ReflectType reflectType;
-
-		Sphere(double rad, Vec ori, Vec emi, Vec col, ReflectType mat) : radius(rad), origin(ori), emission(emi), color(col), reflectType(mat){}
+		Sphere(double rad, Vec ori, Vec emi, Vec col, ReflectType mat) : radius(rad), origin(ori), Shape(emi, col, mat){}
 
 		double intersect_old(const Ray &ray) const
 		{
