@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "Vec.hpp"
-#include "include/tinyobjloader/tiny_obj_loader.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 
 class Model
 {
@@ -12,17 +12,14 @@ class Model
 
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> materials;
-		std::string filename;
 		std::string err;
 		std::vector<Vec> positions;
 
-		Model(){
-
-			filename = "./bunnyLow.obj";
-
+		Model(const char* filename)
+		{
 			positions = std::vector<Vec>();
 
-			bool result = tinyobj::LoadObj(shapes, materials, err, filename.c_str());
+			bool result = tinyobj::LoadObj(shapes, materials, err, filename);
 
 			for (size_t i = 0; i < shapes.size(); ++i)
 			{

@@ -31,11 +31,11 @@ int numSpheres = 7;
 
 std::vector<Triangle> Triangles = std::vector<Triangle>();
 
-void loadModel()
+void loadModel(char *filename)
 {
-	Model obj = Model();
+	Model obj = Model(filename);
 	
-	obj.translate(Vec(45, 1, 80));
+	obj.translate(Vec(40, 1, 80));
 
 	for(int i = 0; i < obj.positions.size(); i+=3)
 	{
@@ -45,7 +45,7 @@ void loadModel()
 			obj.positions[i + 2], 
 			Vec(), 
 			Vec(.999, .999, .99), 
-			REFR);
+			DIFF);
 
 		Triangles.push_back(tri);
 	}
@@ -292,10 +292,12 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive=
 
 int main(int argc, char **argv)
 {
-	loadModel();
+	if(argc != 4)
+		return 0;
+	loadModel(argv[2]);
 
 	int width = 1024, height = 768; // an image with resolution: 1024 * 768
-	int spp = argc == 2 ? atoi(argv[1]) / 4 : 1; // Sample Per Pixel
+	int spp = atoi(argv[1]) / 4; // Sample Per Pixel
 
 	Ray Camera(Vec(50.0, 52.0, 295.6), Vec(0.0, -0.042612, -1.0));
 
@@ -309,13 +311,13 @@ int main(int argc, char **argv)
 
 	int samps = spp, w = width, h = height;
 	
+	#pragma omp parallel for schedule(dynamic, 1) private(r)
 	// start ray tracing
 	for (int y = 0; y < height; ++y) {
 		fprintf(stderr, "\r Rendering (%d spp) %5.2f%%", spp * 4, 100.0 * y / (height - 1));
 
 		unsigned short Xi[3] = { 0, 0, y * y * y };
 
-		#pragma omp parallel for
 		for (unsigned short x = 0; x < width; ++x) {
 
 			// for each pixel do 2x2 subsamples
@@ -373,7 +375,7 @@ int main(int argc, char **argv)
 
 	fprintf(stderr, "\n");
 
-	savePPM("output.ppm", width, height, output);
+	savePPM(argv[3], width, height, output);
 
 	return 0;
 }
