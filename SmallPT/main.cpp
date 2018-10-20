@@ -408,13 +408,15 @@ int main(int argc, char **argv)
 
 	fprintf(stderr, "\n");
 
-	savePPM(argv[3], width, height, output);
+	std::string outputFilename(argv[3]);
+
+	savePPM(outputFilename.c_str(), width, height, output);
 
 	cv::Mat Image(height, width, CV_8UC3);
 
 	convertPpmToMat(width, height, output, Image);
-		
-	cv::imwrite(strncat(argv[3], ".png", 4), Image);
+	
+	cv::imwrite(outputFilename + ".png", Image);
 
 	return 0;
 }
