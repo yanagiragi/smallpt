@@ -154,9 +154,12 @@
   <ItemGroup>
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="Ray.hpp" />
+    <ClInclude Include="Render.hpp" />
+    <ClInclude Include="Scene.hpp" />
     <ClInclude Include="Shape.hpp" />
     <ClInclude Include="Sphere.hpp" />
     <ClInclude Include="Triangle.hpp" />
+    <ClInclude Include="Utils.hpp" />
     <ClInclude Include="Vec.hpp" />
   </ItemGroup>
   <ItemGroup>
