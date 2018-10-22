@@ -48,18 +48,18 @@ void LoadModel(char *filename)
 	obj.translate(Vec(50 + x, y, z));
 
 	for (int i = 0; i < obj.positions.size(); i += 3) {
-		Triangle tri = Triangle(obj.positions[i + 0], obj.positions[i + 1], obj.positions[i + 2], Vec(), Vec(.25, .999, .25), DIFF);
+		Triangle tri = Triangle(obj.positions[i + 0], obj.positions[i + 1], obj.positions[i + 2], Vec(), Vec(.999, .999, .999), DIFF);
 		Triangles.push_back(tri);
 	}
 
-	/*Model obj2 = Model(filename);
-	obj2.translate(Vec(50 - x, y, z));
+	Model obj2 = Model(filename);
+	obj2.translate(Vec(50 - x, y, 4 * z - 5));
 
 	for (int i = 0; i < obj2.positions.size(); i += 3)
 	{
 		Triangle tri = Triangle(obj2.positions[i + 0], obj2.positions[i + 1], obj2.positions[i + 2], Vec(), Vec(.999, .999, .999), DIFF);
 		Triangles.push_back(tri);
-	}*/
+	}
 }
 
 

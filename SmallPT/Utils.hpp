@@ -4,8 +4,8 @@
 #include <math.h> 
 #include <string>
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 
 #include "Vec.hpp"
 
@@ -25,6 +25,7 @@ inline double clamp(double x) { return x > 1 ? 1 : x < 0 ? 0 : x; }
 // Convert float to int for ppm format, Note that we also apply gamma correction.
 //inline int toInt(double x) { return  int(pow(clamp(x), 1.0f / 2.2f) * 255 + 0.5); }
 inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
+inline double gammaCorrect(double x) { return pow(clamp(x), 1 / 2.2); }
 
 void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 {
@@ -38,7 +39,7 @@ void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 	// Instead of fclose()ing the file, I exploit the C++ standard which calls return(0) implicitly, which in turn calls exit(0), which flushes and closes open files. 
 }
 
-void ConvertPpmToMat(int width, int height, Vec *ppmData, cv::Mat &matData)
+/*void ConvertPpmToMat(int width, int height, Vec *ppmData, cv::Mat &matData)
 {
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
@@ -48,12 +49,12 @@ void ConvertPpmToMat(int width, int height, Vec *ppmData, cv::Mat &matData)
 			matData.at<cv::Vec3b>(height - i - 1, width - j - 1)[2] = toInt(ppmData[index].z);
 		}
 	}
-}
+}*/
 
-void SaveResult(char **argv, int width, int height, int spp, Vec* ppmData)
+void SaveResult(char* modelName, int width, int height, int spp, Vec* ppmData)
 {
 	// Generate Filename
-	std::string modelFileName(argv[2]);
+	std::string modelFileName(modelName);
 
 	if (modelFileName.find_first_of("/") != -1) {
 		// 4 for ".obj".length
@@ -73,9 +74,9 @@ void SaveResult(char **argv, int width, int height, int spp, Vec* ppmData)
 	SavePPM(outputPpmFilename, width, height, ppmData);
 
 	// Save PNG
-	cv::Mat Image(height, width, CV_8UC3);
+	/*cv::Mat Image(height, width, CV_8UC3);
 	ConvertPpmToMat(width, height, ppmData, Image);
-	cv::imwrite(outputPngFilename, Image);
+	cv::imwrite(outputPngFilename, Image);*/
 }
 
 #endif

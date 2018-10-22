@@ -1,6 +1,8 @@
 #ifndef VEC_HPP
 #define VEC_HPP
 
+#include <math.h>
+
 struct Vec {        // Usage: time ./smallpt 5000 && xv image.ppm 
 	double x, y, z;                  // position, also color (r,g,b) 
 	Vec(double x_ = 0, double y_ = 0, double z_ = 0) { x = x_; y = y_; z = z_; }
