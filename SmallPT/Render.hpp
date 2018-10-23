@@ -70,10 +70,10 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 	Shape &hitShape = isTriangleHit ? (Shape&)(Triangles[hitId]) : (Shape&)(Spheres[hitId]);
 
 	if (isTriangleHit) {
-		/*origin = Triangles[hitId].p1 + Triangles[hitId].p2 + Triangles[hitId].p3;
+		origin = Triangles[hitId].p1 + Triangles[hitId].p2 + Triangles[hitId].p3;
 		origin.x = origin.x / 3.0;
 		origin.y = origin.y / 3.0;
-		origin.z = origin.z / 3.0;*/
+		origin.z = origin.z / 3.0;
 	}
 	else {
 		origin = ((Sphere&)hitShape).origin;
@@ -102,18 +102,24 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 	// object color (BRDF modulator)
 	Vec color;
 	if(isTriangleHit){
-		//color = hitShape.color;
 		Triangle tri = (Triangle&)(hitShape);
-		float distance1 = fabs((hitPoint - tri.p1).mag());
-		float distance2 = fabs((hitPoint - tri.p2).mag());
-		float distance3 = fabs((hitPoint - tri.p3).mag());
+		float distance1 = (hitPoint - tri.p1).mag();
+		float distance2 = (hitPoint - tri.p2).mag();
+		float distance3 = (hitPoint - tri.p3).mag();
 		float totalDistance = distance1 + distance2 + distance3;
 
-		color.x = (tri.color1.x * distance1 + tri.color2.x * distance2 + tri.color3.x * distance3) / totalDistance;
-		color.y = (tri.color1.y * distance1 + tri.color2.y * distance2 + tri.color3.y * distance3) / totalDistance;
-		color.z = (tri.color1.z * distance1 + tri.color2.z * distance2 + tri.color3.z * distance3) / totalDistance;
+		Vec uv;
+		uv.x = (tri.uv1.x * distance1 + tri.uv2.x * distance2 + tri.uv3.x * distance3) / totalDistance;
+		uv.y = (tri.uv1.y * distance1 + tri.uv2.y * distance2 + tri.uv3.y * distance3) / totalDistance;
 
-		//color = hitShape.color;
+		int textureId = 0;
+		int w = Textures[textureId].cols;
+		int h = Textures[textureId].rows;
+		color = Vec(
+			Textures[textureId].at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
+			Textures[textureId].at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
+			Textures[textureId].at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
+		);
 	}
 	else{
 		color = hitShape.color;	

@@ -84,7 +84,7 @@ void SaveResult(char* modelName, int width, int height, int spp, Vec* ppmData)
 
 cv::Mat LoadImage(const std::string &filename)
 {
-	cv::Mat image = cv::imread(filename, CV_8UC3);
+	cv::Mat image = cv::imread(filename, CV_LOAD_IMAGE_UNCHANGED);
 	return image;
 }
 
