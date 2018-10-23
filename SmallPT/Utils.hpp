@@ -7,6 +7,9 @@
 //#include <opencv2/core/core.hpp>
 //#include <opencv2/highgui/highgui.hpp>
 
+#include <opencv2/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include "Vec.hpp"
 
 #ifdef _MSC_VER
@@ -39,7 +42,7 @@ void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 	// Instead of fclose()ing the file, I exploit the C++ standard which calls return(0) implicitly, which in turn calls exit(0), which flushes and closes open files. 
 }
 
-/*void ConvertPpmToMat(int width, int height, Vec *ppmData, cv::Mat &matData)
+void ConvertPpmToMat(int width, int height, Vec *ppmData, cv::Mat &matData)
 {
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
@@ -49,7 +52,7 @@ void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 			matData.at<cv::Vec3b>(height - i - 1, width - j - 1)[2] = toInt(ppmData[index].z);
 		}
 	}
-}*/
+}
 
 void SaveResult(char* modelName, int width, int height, int spp, Vec* ppmData)
 {
@@ -74,9 +77,15 @@ void SaveResult(char* modelName, int width, int height, int spp, Vec* ppmData)
 	SavePPM(outputPpmFilename, width, height, ppmData);
 
 	// Save PNG
-	/*cv::Mat Image(height, width, CV_8UC3);
+	cv::Mat Image(height, width, CV_8UC3);
 	ConvertPpmToMat(width, height, ppmData, Image);
-	cv::imwrite(outputPngFilename, Image);*/
+	cv::imwrite(outputPngFilename, Image);
+}
+
+cv::Mat LoadImage(const std::string &filename)
+{
+	cv::Mat image = cv::imread(filename, CV_8UC3);
+	return image;
 }
 
 #endif

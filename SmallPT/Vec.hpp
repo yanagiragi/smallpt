@@ -13,6 +13,7 @@ struct Vec {        // Usage: time ./smallpt 5000 && xv image.ppm
 	Vec& norm() { return *this = *this * (1 / sqrt(x*x + y*y + z*z)); }
 	double dot(const Vec &b) const { return x*b.x + y*b.y + z*b.z; } // cross: 
 	Vec operator%(Vec&b) { return Vec(y*b.z - z*b.y, z*b.x - x*b.z, x*b.y - y*b.x); }
+	double mag() { return sqrt(x * x + y * y + z * z); }
 };
 
 #endif

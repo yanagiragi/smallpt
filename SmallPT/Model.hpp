@@ -14,6 +14,7 @@ class Model
 		std::vector<tinyobj::material_t> materials;
 		std::string err;
 		std::vector<Vec> positions;
+		std::vector<Vec> texcoords;
 
 		Model(const char* filename)
 		{
@@ -23,6 +24,8 @@ class Model
 
 			for (size_t i = 0; i < shapes.size(); ++i)
 			{
+				bool hasUV = shapes[i].mesh.texcoords.size() > 0;
+
 				for (size_t f = 0; f < shapes[i].mesh.indices.size() / 3; f++) {
 
 					int indices0 = shapes[i].mesh.indices[f * 3 + 0];
@@ -35,7 +38,7 @@ class Model
 						shapes[i].mesh.positions[indices0 * 3 + 2]
 					);
 					positions.push_back(pos);
-					
+	
 					pos = Vec(
 						shapes[i].mesh.positions[indices1 * 3 + 0],
 						shapes[i].mesh.positions[indices1 * 3 + 1],
@@ -49,6 +52,31 @@ class Model
 						shapes[i].mesh.positions[indices2 * 3 + 2]
 					);
 					positions.push_back(pos);
+					
+
+					if(hasUV)
+					{
+						Vec uv = Vec(
+							shapes[i].mesh.texcoords[indices0 * 2 + 0],
+							shapes[i].mesh.texcoords[indices0 * 2 + 1],
+							0
+						);
+						texcoords.push_back(uv);
+
+						uv = Vec(
+							shapes[i].mesh.texcoords[indices1 * 2 + 0],
+							shapes[i].mesh.texcoords[indices1 * 2 + 1],
+							0
+						);
+						texcoords.push_back(uv);
+
+						uv = Vec(
+							shapes[i].mesh.texcoords[indices2 * 2 + 0],
+							shapes[i].mesh.texcoords[indices2 * 2 + 1],
+							0
+						);
+						texcoords.push_back(uv);
+					}
 				}
 			}
 		}

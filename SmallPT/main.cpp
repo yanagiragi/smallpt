@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 		if (seeds[i] < 2)
 			seeds[i] = 2;
 	}
-
+	
 	//UpdateRendering();
 
 	modelName = argv[2];
@@ -40,9 +40,9 @@ int main(int argc, char **argv)
 	SetupGlutDisplay(argc, argv);
 	glutMainLoop();
 
-	free(pixels);
-	free(seeds);
-	free(output);
+	//free(pixels);
+	//free(seeds);
+	//free(output);
 
 	return 0;
 }

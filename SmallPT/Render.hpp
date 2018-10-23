@@ -100,7 +100,26 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 	Vec orientedHitPointNormal = hitPointNormal.dot(ray.direction) < 0 ? hitPointNormal : hitPointNormal * -1;
 
 	// object color (BRDF modulator)
-	Vec color = hitShape.color;
+	Vec color;
+	if(isTriangleHit){
+		//color = hitShape.color;
+		Triangle tri = (Triangle&)(hitShape);
+		float distance1 = fabs((hitPoint - tri.p1).mag());
+		float distance2 = fabs((hitPoint - tri.p2).mag());
+		float distance3 = fabs((hitPoint - tri.p3).mag());
+		float totalDistance = distance1 + distance2 + distance3;
+
+		color.x = (tri.color1.x * distance1 + tri.color2.x * distance2 + tri.color3.x * distance3) / totalDistance;
+		color.y = (tri.color1.y * distance1 + tri.color2.y * distance2 + tri.color3.y * distance3) / totalDistance;
+		color.z = (tri.color1.z * distance1 + tri.color2.z * distance2 + tri.color3.z * distance3) / totalDistance;
+
+		//color = hitShape.color;
+	}
+	else{
+		color = hitShape.color;	
+	}
+
+	return color;
 
 	// Russian Roulette, stop the recursion randomly based on surface reflectivity
 	// p stands for probability, choose maximum component (r,g,b) of the surface color
@@ -125,9 +144,9 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		// From Realistic Ray Tracing: 
 		// We shouldn't take horizontal and vertical dimensions uniformly to (r, phi)
 		// because it does not preserve relative area
-		// Â²³æ¨Ó»¡¡A®g¨ìsurface¤§«á¡A³o­Ó®g½u¦A«×®g¨ìImage Plane ªº¾÷²v¤À¥¬¨Ã¤£¬O¦b¤ô¥­¸ò««ª½§¡¤Ã¤À¥¬ªº
-		// ¦]¦¹¡A¦pªG§Ú­Ì¤À¶} randomly sample, ·|¤£²Å¦X¹ê»Ú¤Wªº¾÷²v¤À¥¬
-		// ©Ò¥H¡A§Ú­Ì¬O¹ï Unit Disk °µ Sample¡A¦A¥Î¥L¥h¤Ï±À¦^¥h¨ì¥b²yªºsolid angle ¨D¥X·sªº¤è¦V
+		// Â²ï¿½ï¿½Ó»ï¿½ï¿½Aï¿½gï¿½ï¿½surfaceï¿½ï¿½ï¿½ï¿½Aï¿½oï¿½Ó®gï¿½uï¿½Aï¿½×®gï¿½ï¿½Image Plane ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ï¿½ï¿½ï¿½ï¿½Ã¤ï¿½ï¿½Oï¿½bï¿½ï¿½ò««ªï¿½ï¿½ï¿½ï¿½Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½
+		// ï¿½]ï¿½ï¿½ï¿½Aï¿½pï¿½Gï¿½Ú­Ì¤ï¿½ï¿½} randomly sample, ï¿½|ï¿½ï¿½ï¿½Å¦Xï¿½ï¿½Ú¤Wï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ï¿½ï¿½ï¿½
+		// ï¿½Ò¥Hï¿½Aï¿½Ú­Ì¬Oï¿½ï¿½ Unit Disk ï¿½ï¿½ Sampleï¿½Aï¿½Aï¿½Î¥Lï¿½hï¿½Ï±ï¿½ï¿½^ï¿½hï¿½ï¿½bï¿½yï¿½ï¿½solid angle ï¿½Dï¿½Xï¿½sï¿½ï¿½ï¿½ï¿½V
 		// Sampling Unit Disk -> Sampling Unit Hemisphere
 
 		// create orthonormal coordinate frame (w,u,v)

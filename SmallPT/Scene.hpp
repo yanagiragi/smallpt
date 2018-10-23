@@ -8,6 +8,7 @@
 #include "Sphere.hpp"
 #include "Triangle.hpp"
 #include "Model.hpp"
+#include "Utils.hpp"
 
 // Variables
 std::vector<Sphere> Spheres;
@@ -47,10 +48,17 @@ void LoadModel(char *filename)
 
 	obj.translate(Vec(50 + x, y, z));
 
+	//cv::Mat image1 = LoadImage("models/TexturesCom_TilesOrnate0043_1_seamless_S.jpg");
+	cv::Mat image1 = LoadImage("models/Untitled.png");
+
 	for (int i = 0; i < obj.positions.size(); i += 3) {
 		Triangle tri = Triangle(obj.positions[i + 0], obj.positions[i + 1], obj.positions[i + 2], Vec(), Vec(.999, .999, .999), DIFF);
+
+		tri.SetColor(obj.texcoords[i + 0], obj.texcoords[i + 1], obj.texcoords[i + 2], image1);
+
 		Triangles.push_back(tri);
 	}
+
 
 	Model obj2 = Model(filename);
 	obj2.translate(Vec(50 - x, y, 4 * z - 5));
@@ -61,7 +69,6 @@ void LoadModel(char *filename)
 		Triangles.push_back(tri);
 	}
 }
-
 
 // get min intersect distance & SphereId (the intersected sphere that is not being occlude from other sphere)
 inline bool intersect(const Ray &ray, double &t, int &id)

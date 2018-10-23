@@ -1,6 +1,6 @@
 INCLUDES := -Iincludes
 LIBS := -lGL -lglut
-FLAGS := -O3 -fopenmp -g
+FLAGS := -O3 -fopenmp -g `pkg-config --cflags --libs opencv`
 
 all: build
 
