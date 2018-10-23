@@ -15,14 +15,17 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		return Vec();
 
 	Vec origin;
-	int hitId = id >= Spheres.size() ? id - Spheres.size() : id;
-	Shape &hitShape = (id >= Spheres.size()) ? (Shape&)(Triangles[hitId]) : (Shape&)(Spheres[hitId]);
 
-	if (id >= Spheres.size()) {
-		origin = Triangles[hitId].p1 + Triangles[hitId].p2 + Triangles[hitId].p3;
+	bool isTriangleHit = (id >= Spheres.size());
+
+	int hitId = isTriangleHit ? id - Spheres.size() : id;
+	Shape &hitShape = isTriangleHit ? (Shape&)(Triangles[hitId]) : (Shape&)(Spheres[hitId]);
+
+	if (isTriangleHit) {
+		/*origin = Triangles[hitId].p1 + Triangles[hitId].p2 + Triangles[hitId].p3;
 		origin.x = origin.x / 3.0;
 		origin.y = origin.y / 3.0;
-		origin.z = origin.z / 3.0;
+		origin.z = origin.z / 3.0;*/
 	}
 	else {
 		origin = ((Sphere&)hitShape).origin;
@@ -34,9 +37,15 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 	// get surface point
 	Vec hitPoint = ray.origin + ray.direction * t;
 
-
 	// surface normal
-	Vec hitPointNormal = (hitPoint - origin).norm();
+	Vec hitPointNormal;
+	
+	if(isTriangleHit){
+		hitPointNormal = Triangles[hitId].normal;
+	}
+	else{
+		hitPointNormal = (hitPoint - origin).norm();
+	}
 
 	// properly oriented surface normal
 	// when hit glass surface, ray tracer should determined entering or exiting the surface
@@ -128,9 +137,7 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 	{
 		return hitShape.emission + color.mult(radiance(Ray(hitPoint, ray.direction - hitPointNormal * 2 * hitPointNormal.dot(ray.direction)), depth, Xi));
 	}
-
-	// REFR
-	else {
+	else { // REFR
 
 		// Glass: Reflect & Refract
 
@@ -141,17 +148,17 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		double nc = 1; // c is the speed of light in vacuum
 		double nt = 1.5; // t is the phase velocity of light in the medium
 
-						 // refractiveIndex, glass IOR ~= 1.5
-						 // Check: https://en.wikipedia.org/wiki/Crown_glass_(optics)
-						 // Not account for dispersion (to account these, vary index by wavelength)
+		// refractiveIndex, glass IOR ~= 1.5
+		// Check: https://en.wikipedia.org/wiki/Crown_glass_(optics)
+		// Not account for dispersion (to account these, vary index by wavelength)
 		double nnt = into ? nc / nt : nt / nc;
 
 		double ddn = ray.direction.dot(orientedHitPointNormal);
 		double cos2t; // cos(sida_b)
 
-					  // if total internel reflection, reflect
-					  // happens when angle is too shallow
-					  // cos2t = cos(sida_b) ^ 2
+		// if total internel reflection, reflect
+		// happens when angle is too shallow
+		// cos2t = cos(sida_b) ^ 2
 		cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
 		if (cos2t < 0)
 		{

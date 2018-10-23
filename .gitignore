@@ -338,7 +338,7 @@ ASALocalRun/
 *.swp
 
 # Executables
-pt
+pt*
 
 # Model folder
 models

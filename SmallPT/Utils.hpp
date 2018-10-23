@@ -25,7 +25,7 @@ inline double clamp(double x) { return x > 1 ? 1 : x < 0 ? 0 : x; }
 // Convert float to int for ppm format, Note that we also apply gamma correction.
 //inline int toInt(double x) { return  int(pow(clamp(x), 1.0f / 2.2f) * 255 + 0.5); }
 inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
-inline double gammaCorrect(double x) { return pow(clamp(x), 1 / 2.2); }
+inline double gammaCorrection(double x) { return pow(clamp(x), 1 / 2.2); }
 
 void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 {

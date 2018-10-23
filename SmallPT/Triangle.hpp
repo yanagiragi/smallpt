@@ -7,9 +7,14 @@ class Triangle : public Shape
 {
 	public:
 
-		Vec p1, p2, p3;
+		Vec p1, p2, p3, normal;
 
-		Triangle(Vec _p1, Vec _p2, Vec _p3, Vec emi, Vec col, ReflectType mat) : p1(_p1), p2(_p2), p3(_p3), Shape(emi, col, mat){}
+		Triangle(Vec _p1, Vec _p2, Vec _p3, Vec emi, Vec col, ReflectType mat) : p1(_p1), p2(_p2), p3(_p3), Shape(emi, col, mat)
+		{
+			Vec p1p2 = (_p1 - _p2);
+			Vec p1p3 = (_p1 - _p3);
+			normal = (p1p2 % p1p3).norm();
+		}
 
 		double intersect(const Ray &r) const { // returns distance, 0 if nohit 
 			

@@ -26,6 +26,13 @@ int main(int argc, char **argv)
 	for(int i = 0; i < width * height * channel; ++i)
 		pixels[i] = 0;
 
+	seeds = new unsigned int[width * height * channel * 2];
+	for (int i = 0; i < width * height * channel * 2; ++i) {
+		seeds[i] = rand();
+		if (seeds[i] < 2)
+			seeds[i] = 2;
+	}
+
 	//UpdateRendering();
 
 	modelName = argv[2];
@@ -33,7 +40,9 @@ int main(int argc, char **argv)
 	SetupGlutDisplay(argc, argv);
 	glutMainLoop();
 
-	//free(pixels);
+	free(pixels);
+	free(seeds);
+	free(output);
 
 	return 0;
 }
