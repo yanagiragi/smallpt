@@ -4,6 +4,54 @@
 #include "Ray.hpp"
 #include "Utils.hpp"
 
+Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
+{
+	//Sampling Lights, loop over any lights
+	Vec e;
+	
+	double t;
+	int id;
+
+	for (int i = 0; i < Spheres.size(); ++i) {
+		const Sphere &s = Spheres[i];
+
+		if (s.emission.x <= 0 && s.emission.y <= 0 && s.emission.z <= 0)
+			continue; // skip non-lights
+
+						// create random direction towards sphere
+		Vec sw = s.origin - hitPoint;
+		Vec su = ((fabs(sw.x) > 0.1 ? Vec(0, 1) : Vec(1)) % sw).norm();
+		Vec sv = sw % su;
+
+		// Sampling Sphere by Solid Angle
+		double cos_a_max = sqrt(1 - s.radius * s.radius / (hitPoint - s.origin).dot(hitPoint - s.origin));
+		double esp1 = erand48(Xi), esp2 = erand48(Xi);
+		double cos_a = 1 - esp1 + esp1 * cos_a_max;
+		double sin_a = sqrt(1 - cos_a * cos_a);
+		double phi = 2 * pi * esp2;
+
+		// From Realistic Ray Tracing:
+		// [ cos_a ] = [ 1 + esp1(cos_a_max - 1) ]
+		// [  phi  ]   [      2 * pi * esp2      ]
+		Vec l = su * cos(phi) * sin_a + sv * sin(phi) * sin_a + sw * cos_a;
+		l.norm();
+
+		// shoot shadow ray
+		if (intersect(Ray(hitPoint, l), t, id) && id == i) {
+			double omega = 2 * pi * (1 - cos_a_max); // 1/probability with respect to solid angle
+
+			// calculating lighting and add to current value
+			e = e + color.mult(s.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+		}
+	}
+
+	// Sample Triangles
+	
+	// To Be Done
+
+	return e;
+}
+
 // Xi: Random number seed
 Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive = 1) {
 
@@ -94,41 +142,7 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		// since cos^2 + sin^2 = 1, last term = sqrt ( 1 - randomDistanceFromCenter ^ 2) = sqrt(1 - r2)
 		Vec d = (u * cos(r1) * randomDistanceFromCenter + v * sin(r1) * randomDistanceFromCenter + w * sqrt(1 - r2)).norm();
 
-		//Sampling Lights, loop over any lights
-		Vec e;
-
-		for (int i = 0; i < Spheres.size(); ++i) {
-			const Sphere &s = Spheres[i];
-
-			if (s.emission.x <= 0 && s.emission.y <= 0 && s.emission.z <= 0)
-				continue; // skip non-lights
-
-						  // create random direction towards sphere
-			Vec sw = s.origin - hitPoint;
-			Vec su = ((fabs(sw.x) > 0.1 ? Vec(0, 1) : Vec(1)) % sw).norm();
-			Vec sv = sw % su;
-
-			// Sampling Sphere by Solid Angle
-			double cos_a_max = sqrt(1 - s.radius * s.radius / (hitPoint - s.origin).dot(hitPoint - s.origin));
-			double esp1 = erand48(Xi), esp2 = erand48(Xi);
-			double cos_a = 1 - esp1 + esp1 * cos_a_max;
-			double sin_a = sqrt(1 - cos_a * cos_a);
-			double phi = 2 * pi * esp2;
-
-			// From Realistic Ray Tracing:
-			// [ cos_a ] = [ 1 + esp1(cos_a_max - 1) ]
-			// [  phi  ]   [      2 * pi * esp2      ]
-			Vec l = su * cos(phi) * sin_a + sv * sin(phi) * sin_a + sw * cos_a;
-			l.norm();
-
-			// shoot shadow ray
-			if (intersect(Ray(hitPoint, l), t, id) && id == i) {
-				double omega = 2 * pi * (1 - cos_a_max); // 1/probability with respect to solid angle
-
-														 // calculating lighting and add to current value
-				e = e + color.mult(s.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
-			}
-		}
+		Vec e = SampleLights(hitPoint, orientedHitPointNormal, color, Xi);
 
 		return hitShape.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 
