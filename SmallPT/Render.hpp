@@ -4,21 +4,25 @@
 #include "Ray.hpp"
 #include "Utils.hpp"
 
+#include "Config.hpp"
+
 Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
 {
 	//Sampling Lights, loop over any lights
 	Vec e;
 	
+	Scene Scene = globalConfig::MainScene;
+
 	double t;
 	int id;
 
-	for (int i = 0; i < Spheres.size(); ++i) {
-		const Sphere &s = Spheres[i];
+	for (int i = 0; i < Scene.Spheres.size(); ++i) {
+		const Sphere &s = Scene.Spheres[i];
 
 		if (s.emission.x <= 0 && s.emission.y <= 0 && s.emission.z <= 0)
 			continue; // skip non-lights
 
-						// create random direction towards sphere
+		// create random direction towards sphere
 		Vec sw = s.origin - hitPoint;
 		Vec su = ((fabs(sw.x) > 0.1 ? Vec(0, 1) : Vec(1)) % sw).norm();
 		Vec sv = sw % su;
@@ -37,7 +41,7 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 		l.norm();
 
 		// shoot shadow ray
-		if (intersect(Ray(hitPoint, l), t, id) && id == i) {
+		if (Scene.intersect(Ray(hitPoint, l), t, id) && id == i) {
 			double omega = 2 * pi * (1 - cos_a_max); // 1/probability with respect to solid angle
 
 			// calculating lighting and add to current value
@@ -55,22 +59,24 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 // Xi: Random number seed
 Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive = 1) {
 
+	Scene Scene = globalConfig::MainScene;
+
 	double t;
 	int id = 0;
 	int MAX_DEPTH = 10;
 
-	if (!intersect(ray, t, id))	// miss, return black color
+	if (!Scene.intersect(ray, t, id))	// miss, return black color
 		return Vec();
 
 	Vec origin;
 
-	bool isTriangleHit = (id >= Spheres.size());
+	bool isTriangleHit = (id >= Scene.Spheres.size());
 
-	int hitId = isTriangleHit ? id - Spheres.size() : id;
-	Shape &hitShape = isTriangleHit ? (Shape&)(Triangles[hitId]) : (Shape&)(Spheres[hitId]);
+	int hitId = isTriangleHit ? id - Scene.Spheres.size() : id;
+	Shape &hitShape = isTriangleHit ? (Shape&)(Scene.Triangles[hitId]) : (Shape&)(Scene.Spheres[hitId]);
 
 	if (isTriangleHit) {
-		origin = Triangles[hitId].p1 + Triangles[hitId].p2 + Triangles[hitId].p3;
+		origin = Scene.Triangles[hitId].p1 + Scene.Triangles[hitId].p2 + Scene.Triangles[hitId].p3;
 		origin.x = origin.x / 3.0;
 		origin.y = origin.y / 3.0;
 		origin.z = origin.z / 3.0;
@@ -89,7 +95,7 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 	Vec hitPointNormal;
 	
 	if(isTriangleHit){
-		hitPointNormal = Triangles[hitId].normal;
+		hitPointNormal = Scene.Triangles[hitId].normal;
 	}
 	else{
 		hitPointNormal = (hitPoint - origin).norm();
@@ -112,20 +118,24 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		uv.x = (tri.uv1.x * distance1 + tri.uv2.x * distance2 + tri.uv3.x * distance3) / totalDistance;
 		uv.y = (tri.uv1.y * distance1 + tri.uv2.y * distance2 + tri.uv3.y * distance3) / totalDistance;
 
-		int textureId = 0;
-		int w = Textures[textureId].cols;
-		int h = Textures[textureId].rows;
+		int texId = 0;
+		int w = Scene.Textures[texId].cols;
+		int h = Scene.Textures[texId].rows;
+		cv::Mat tex = Scene.Textures[texId];
 		color = Vec(
-			Textures[textureId].at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
-			Textures[textureId].at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
-			Textures[textureId].at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
+			tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
+			tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
+			tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
 		);
+
+		// TODO: wierd uv interpolation?
+		// use hitShape.color instead for now.
+		color = hitShape.color;
 	}
 	else{
+		// no uv support for sphere for now
 		color = hitShape.color;	
 	}
-
-	return color;
 
 	// Russian Roulette, stop the recursion randomly based on surface reflectivity
 	// p stands for probability, choose maximum component (r,g,b) of the surface color
@@ -150,10 +160,10 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		// From Realistic Ray Tracing: 
 		// We shouldn't take horizontal and vertical dimensions uniformly to (r, phi)
 		// because it does not preserve relative area
-		// ²��ӻ��A�g��surface����A�o�Ӯg�u�A�׮g��Image Plane �����v�����ä��O�b��򫫪����ä�����
-		// �]���A�p�G�ڭ̤��} randomly sample, �|���ŦX��ڤW�����v����
-		// �ҥH�A�ڭ̬O�� Unit Disk �� Sample�A�A�ΥL�h�ϱ��^�h��b�y��solid angle �D�X�s����V
-		// Sampling Unit Disk -> Sampling Unit Hemisphere
+		// 簡單來說，射到surface之後，這個射線再度射到Image Plane 的機率分布並不是在水平跟垂直均勻分布的
+		// 因此，如果我們分開 randomly sample, 會不符合實際上的機率分布
+		// 所以，我們是對 Unit Disk 做 Sample，再用他去反推回去到半球的solid angle 求出新的方向
+		// Sampling Unit Disk . Sampling Unit Hemisphere
 
 		// create orthonormal coordinate frame (w,u,v)
 		Vec w = orientedHitPointNormal;

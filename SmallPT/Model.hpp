@@ -26,6 +26,8 @@ class Model
 			{
 				bool hasUV = shapes[i].mesh.texcoords.size() > 0;
 
+				if(hasUV)printf("hasUV\n");
+
 				for (size_t f = 0; f < shapes[i].mesh.indices.size() / 3; f++) {
 
 					int indices0 = shapes[i].mesh.indices[f * 3 + 0];

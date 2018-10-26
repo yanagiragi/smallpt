@@ -12,6 +12,8 @@
 
 #include "Vec.hpp"
 
+#include "Config.hpp"
+
 #ifdef _MSC_VER
 	#include <random>
 	std::default_random_engine generator;
@@ -30,8 +32,11 @@ inline double clamp(double x) { return x > 1 ? 1 : x < 0 ? 0 : x; }
 inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
 inline double gammaCorrection(double x) { return pow(clamp(x), 1 / 2.2); }
 
-void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
+void SavePPM(std::string outputFileName, Vec *outputData)
 {
+	int width = globalConfig::width;
+	int height = globalConfig::height;
+	
 	FILE *f = fopen(outputFileName.c_str(), "w");
 	fprintf(f, "P3\n%d %d\n%d\n", width, height, 255); // store value in [0, 255]
 	for (int i = 0; i < width * height; ++i) {
@@ -54,32 +59,22 @@ void ConvertPpmToMat(int width, int height, Vec *ppmData, cv::Mat &matData)
 	}
 }
 
-void SaveResult(char* modelName, int width, int height, int spp, Vec* ppmData)
+void SaveResult()
 {
 	// Generate Filename
-	std::string modelFileName(modelName);
-
-	if (modelFileName.find_first_of("/") != -1) {
-		// 4 for ".obj".length
-		modelFileName = modelFileName.substr(modelFileName.find_first_of("/") + 1, modelFileName.length() - modelFileName.find_first_of("/") - 1 - 4);
-	}
-	else {
-		modelFileName = modelFileName.substr(0, modelFileName.length() - 4);
-	}
-	
 	std::ostringstream outputFilenameStringStream;
-	outputFilenameStringStream << "images/" << "output_" << modelFileName << "_" << spp << "spp";
+	outputFilenameStringStream << globalConfig::SaveImageNamePrefix << globalConfig::currentSpp << "spp";
 
 	std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
 	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
 
 	// Save PPM
-	SavePPM(outputPpmFilename, width, height, ppmData);
+	SavePPM(outputPpmFilename, globalConfig::output);
 
 	// Save PNG
-	cv::Mat Image(height, width, CV_8UC3);
-	ConvertPpmToMat(width, height, ppmData, Image);
-	cv::imwrite(outputPngFilename, Image);
+	//cv::Mat Image(height, width, CV_8UC3);
+	//ConvertPpmToMat(width, height, ppmData, Image);
+	//cv::imwrite(outputPngFilename, Image);
 }
 
 cv::Mat LoadImage(const std::string &filename)

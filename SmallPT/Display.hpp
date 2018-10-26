@@ -9,19 +9,7 @@
 #include "Vec.hpp"
 #include "Utils.hpp"
 
-float *pixels;
-Vec *output;
-
-int width = 800;
-int height = 600;
-
-int channel = 3;
-int currentSpp = 0;
-int limitSpp = 4;
-
-char *modelName;
-
-static unsigned int *seeds;
+#include "Config.hpp"
 
 static float GetRandom(unsigned int *seed0, unsigned int *seed1) {
 	*seed0 = 36969 * ((*seed0) & 65535) + ((*seed0) >> 16);
@@ -41,15 +29,21 @@ static float GetRandom(unsigned int *seed0, unsigned int *seed1) {
 
 void UpdateRendering()
 {
-	if(currentSpp < limitSpp){
-		SaveResult(modelName, width, height, currentSpp, output);
-                ++currentSpp;
+	if(globalConfig::currentSpp < globalConfig::limitSpp){
+		//if(currentSpp != 0)
+		//	SaveResult(modelName, width, height, currentSpp, output);
+        ++ globalConfig::currentSpp;
 	}
 	else{
 		return;
 	}
 
-	int spp = currentSpp;
+	const int spp = globalConfig::currentSpp;
+	const int width = globalConfig::width;
+	const int height = globalConfig::height;
+	const int channel = globalConfig::channel;
+	Vec* output = globalConfig::output;
+	float* pixels = globalConfig::pixels;
 
 	Ray Camera(Vec(50.0, 52.0, 295.6), Vec(0.0, -0.042612, -1.0));
 
@@ -72,7 +66,7 @@ void UpdateRendering()
                 unsigned short Xi[3] = { rand(), rand(), rand()};
 		
                 for (unsigned short x = 0; x < width; ++x) {
-			const int i =  (height - y - 1) * width + x;
+						const int i =  (height - y - 1) * width + x;
                         const int i2 = i * 2;
 
                         // Store radiance increased after 2x2 subsamples
@@ -120,9 +114,9 @@ void UpdateRendering()
 			}
 
                         // normalize color
-                        const float k1 = currentSpp;
-			const float k2 = 1.f / (k1 + 1.f);
-                        if(currentSpp == 1){
+                        const float k1 = spp;
+						const float k2 = 1.f / (k1 + 1.f);
+                        if(spp == 1){
                                 output[i] = increment;
                         }                                
                         else{
@@ -141,29 +135,30 @@ void UpdateRendering()
 }
 
 void idleFunc(void) {
-        UpdateRendering();        
+    UpdateRendering();        
 	glutPostRedisplay();
 }
 
 void displayFunc(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
         glRasterPos2i(-1, -1);
-	glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
+	glDrawPixels(globalConfig::width, globalConfig::height, GL_RGB, GL_FLOAT, globalConfig::pixels);
 	glutSwapBuffers();
 }
 
 void reshapeFunc(int newWidth, int newHeight) {
-	width = newWidth;
-	height = newHeight;
-	glViewport(0, 0, width, height);
+	// no reshape!
+	/*globalConfig::width = newWidth;
+	globalConfig::height = newHeight;
+	glViewport(0, 0, globalConfig::width, globalConfig::height);
 	glLoadIdentity();	
-	glutPostRedisplay();
+	glutPostRedisplay();*/
 }
 
 void SetupGlutDisplay(int argc, char **argv)
 {
         glutInit(&argc, argv);
-        glutInitWindowSize(width, height);
+        glutInitWindowSize(globalConfig::width, globalConfig::height);
         glutInitWindowPosition(0,0);
         glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 
