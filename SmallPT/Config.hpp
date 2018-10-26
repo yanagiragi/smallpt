@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Vec.hpp"
-#include "Scene.hpp"
+//#include "Scene.hpp"
 
 namespace globalConfig
 {   
@@ -20,8 +20,8 @@ namespace globalConfig
     int channel = 3;
     int currentSpp = 0;
     
-    SceneS MainScene = SceneS);
-
+    Scene MainScene = Scene();
+    
     char *modelName;
 
     std::string SaveImageNamePrefix;
@@ -76,6 +76,6 @@ namespace globalConfig
         free(globalConfig::output);
         free(globalConfig::seeds);
     }
-};
+}
 
 #endif

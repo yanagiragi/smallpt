@@ -12,7 +12,7 @@
 
 #include "Vec.hpp"
 
-#include "Config.hpp"
+//#include "Config.hpp"
 
 #ifdef _MSC_VER
 	#include <random>
@@ -32,10 +32,10 @@ inline double clamp(double x) { return x > 1 ? 1 : x < 0 ? 0 : x; }
 inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
 inline double gammaCorrection(double x) { return pow(clamp(x), 1 / 2.2); }
 
-void SavePPM(std::string outputFileName, Vec *outputData)
+void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 {
-	int width = globalConfig::width;
-	int height = globalConfig::height;
+	//int width = globalConfig::width;
+	//int height = globalConfig::height;
 	
 	FILE *f = fopen(outputFileName.c_str(), "w");
 	fprintf(f, "P3\n%d %d\n%d\n", width, height, 255); // store value in [0, 255]
@@ -63,13 +63,13 @@ void SaveResult()
 {
 	// Generate Filename
 	std::ostringstream outputFilenameStringStream;
-	outputFilenameStringStream << globalConfig::SaveImageNamePrefix << globalConfig::currentSpp << "spp";
+	//outputFilenameStringStream << globalConfig::SaveImageNamePrefix << globalConfig::currentSpp << "spp";
 
 	std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
 	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
 
 	// Save PPM
-	SavePPM(outputPpmFilename, globalConfig::output);
+	//SavePPM(outputPpmFilename, globalConfig::output);
 
 	// Save PNG
 	//cv::Mat Image(height, width, CV_8UC3);

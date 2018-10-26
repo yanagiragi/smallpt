@@ -1,16 +1,14 @@
-#ifndef _SCENES_HPP
-#define _SCENES_HPP
+#ifndef _SCENE_HPP
+#define _SCENE_HPP
 
 #include <vector>
 
-#include "Vec.hpp"
-#include "Shape.hpp"
 #include "Sphere.hpp"
 #include "Triangle.hpp"
 #include "Model.hpp"
 #include "Utils.hpp"
 
-class SceneS
+class Scene
 {
 	public:
 	// Variables
