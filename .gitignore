@@ -339,6 +339,7 @@ ASALocalRun/
 
 # Executables
 pt*
+pt_cpu
 
 # Model folder
 models
