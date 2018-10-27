@@ -345,4 +345,6 @@ pt_cpu
 models
 
 # image folder
-images/*
+*.ppm
+*.png
+*.jpg
