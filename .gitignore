@@ -343,3 +343,6 @@ pt_cpu
 
 # Model folder
 models
+
+# image folder
+images/*
