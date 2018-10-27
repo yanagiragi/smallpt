@@ -3,26 +3,18 @@
 
 #include "Ray.hpp"
 #include "Vec.hpp"
+#include "Material.hpp"
 
 const double epsilon = 1e-4;
-
-enum ReflectType
-{
-	DIFF, SPEC, REFR
-};
 
 class Shape
 {
 	public:
 
-		Shape(Vec emi, Vec col, ReflectType refl) : emission(emi), color(col), reflectType(refl) {}
+		Material material;
 
-		Vec emission;
-
-		Vec color;
-
-		ReflectType reflectType;
-
+		Shape(Vec emi, Vec col, ReflectType refl) : 
+			material(emi, col, refl) {}
 };
 
 #endif // !SPHERE_HPP

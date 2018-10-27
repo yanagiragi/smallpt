@@ -1,8 +1,8 @@
 INCLUDES := -Iincludes
 LIBS := -lGL -lglut
-FLAGS := -O3 -fopenmp -g `pkg-config --cflags --libs opencv`
-
+FLAGS := -fopenmp -g `pkg-config --cflags --libs opencv`
+CC := g++
 all: build
 
 build:
-	g++ main.cpp $(FLAGS) $(INCLUDES) $(LIBS) -o pt_cpu
+	$(CC) main.cpp $(FLAGS) $(INCLUDES) $(LIBS) -o pt_cpu

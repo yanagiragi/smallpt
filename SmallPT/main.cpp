@@ -2,6 +2,7 @@
  // Make : g++ -O3 -fopenmp smallpt.cpp -o smallpt 
  // Remove "-fopenmp" for g++ version < 4.2 
 
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sstream>
@@ -11,38 +12,33 @@
 #include "Utils.hpp"
 #include "Display.hpp"
 
+#include "Config.hpp"
+
+void sigintHandler(int arg) {
+   if( SIGINT == arg )
+   {
+      printf("\ninterrupted\n");
+	  globalConfig::ReleaseConfig();
+      exit( 0 );
+   }
+}
+
+
 int main(int argc, char **argv)
 {
-	// Setup Scenes
-	LoadScene(argv);
+	signal( SIGINT, sigintHandler );
 
-	// Sample Per Pixel
-	limitSpp = atoi(argv[1]) <= 0 ? 1 : atoi(argv[1]); 
-
- 	output = new Vec[width * height];
-
-	pixels = new float [ width * height * channel];
-		
-	for(int i = 0; i < width * height * channel; ++i)
-		pixels[i] = 0;
-
-	seeds = new unsigned int[width * height * channel * 2];
-	for (int i = 0; i < width * height * channel * 2; ++i) {
-		seeds[i] = rand();
-		if (seeds[i] < 2)
-			seeds[i] = 2;
-	}
-	
-	//UpdateRendering();
-
-	modelName = argv[2];
+	globalConfig::InitConfig(
+		800, // width
+		600, // height
+		atoi(argv[1]), // spp
+		argv[2] // model loading name
+	);
 
 	SetupGlutDisplay(argc, argv);
 	glutMainLoop();
 
-	//free(pixels);
-	//free(seeds);
-	//free(output);
+	globalConfig::ReleaseConfig();
 
 	return 0;
 }

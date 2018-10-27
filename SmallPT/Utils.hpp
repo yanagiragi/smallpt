@@ -69,7 +69,7 @@ void SaveResult()
 	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
 
 	// Save PPM
-	//SavePPM(outputPpmFilename, globalConfig::output);
+	// SavePPM(outputPpmFilename, globalConfig::output);
 
 	// Save PNG
 	//cv::Mat Image(height, width, CV_8UC3);

@@ -16,10 +16,11 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 	double t;
 	int id;
 
+	// Sample Spheres
 	for (int i = 0; i < Scene.Spheres.size(); ++i) {
 		const Sphere &s = Scene.Spheres[i];
 
-		if (s.emission.x <= 0 && s.emission.y <= 0 && s.emission.z <= 0)
+		if (s.material.emission.x <= 0 && s.material.emission.y <= 0 && s.material.emission.z <= 0)
 			continue; // skip non-lights
 
 		// create random direction towards sphere
@@ -45,13 +46,54 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 			double omega = 2 * pi * (1 - cos_a_max); // 1/probability with respect to solid angle
 
 			// calculating lighting and add to current value
-			e = e + color.mult(s.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+			e = e + color.mult(s.material.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
 		}
 	}
 
-	// Sample Triangles
-	
-	// To Be Done
+	// Sample Triangles	
+	for (int i = 0; i < Scene.Triangles.size(); ++i) {
+		const Triangle &tri = Scene.Triangles[i];
+
+		if (tri.material.emission.x <= 0 && tri.material.emission.y <= 0 && tri.material.emission.z <= 0)
+			continue; // skip non-lights
+
+		double u1 = erand48(Xi);
+		double u2 = erand48(Xi);
+
+		// From Pbrt v3 & Minilight
+		double su0 = sqrt(u1);
+		double esp1 = 1 - su0;
+		double esp2 = (1 - u2) * su0;
+
+		Vec hitPointTri = (tri.p3 - tri.p1) * esp1 + (tri.p2 - tri.p1) * esp2 + tri.p1;
+		//Vec hitPointTri = tri.p1 * esp1 + tri.p2 * esp2 + tri.p3 * (1 - esp1 - esp2);
+		Vec l = hitPointTri - hitPoint;
+
+		// shoot shadow ray
+		if (Scene.intersect(Ray(hitPoint, l), t, id) && id == i) {
+			
+			double area = tri.Area();
+			//Vec outDirection = hitPoint- hitPointTri;//l.mult(Vec(-1, -1, -1));
+			Vec outDirection = l.mult(Vec(-1, -1, -1));
+			double distance2 = l.dot(l);
+			
+			double cosArea = area * outDirection.dot(tri.normal);
+		
+			double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
+
+			
+			
+			omega = 1;// - distance2 / cosArea;
+
+			//printf("%f\n", omega);
+
+			//if(cosArea < 0)
+		 	//	continue;
+
+			// calculating lighting and add to current value
+			e = e + color.mult(tri.material.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+		}
+	}
 
 	return e;
 }
@@ -118,23 +160,28 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		uv.x = (tri.uv1.x * distance1 + tri.uv2.x * distance2 + tri.uv3.x * distance3) / totalDistance;
 		uv.y = (tri.uv1.y * distance1 + tri.uv2.y * distance2 + tri.uv3.y * distance3) / totalDistance;
 
-		int texId = 0;
-		int w = Scene.Textures[texId].cols;
-		int h = Scene.Textures[texId].rows;
-		cv::Mat tex = Scene.Textures[texId];
-		color = Vec(
-			tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
-			tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
-			tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
-		);
+		if(tri.hasUV){
+			int texId = 0;
+			/*int w = Scene.Textures[texId].cols;
+			int h = Scene.Textures[texId].rows;
+			cv::Mat tex = Scene.Textures[texId];
+			color = Vec(
+				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
+				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
+				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
+			);*/
+		}
+		else{
+			color = hitShape.material.color;	
+		}	
 
 		// TODO: wierd uv interpolation?
 		// use hitShape.color instead for now.
-		color = hitShape.color;
+		color = hitShape.material.color;
 	}
 	else{
 		// no uv support for sphere for now
-		color = hitShape.color;	
+		color = hitShape.material.color;	
 	}
 
 	// Russian Roulette, stop the recursion randomly based on surface reflectivity
@@ -146,10 +193,10 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		if (erand48(Xi) < p)
 			color = color * (1 / p);
 		else
-			return hitShape.emission * includeEmissive;
+			return hitShape.material.emission * includeEmissive;
 	}
 
-	if (hitShape.reflectType == DIFF)
+	if (hitShape.material.reflectType == DIFF)
 	{
 		// random angle
 		double r1 = 2 * pi * erand48(Xi);
@@ -179,12 +226,12 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 
 		Vec e = SampleLights(hitPoint, orientedHitPointNormal, color, Xi);
 
-		return hitShape.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
+		return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 
 	}
-	else if (hitShape.reflectType == SPEC)
+	else if (hitShape.material.reflectType == SPEC)
 	{
-		return hitShape.emission + color.mult(radiance(Ray(hitPoint, ray.direction - hitPointNormal * 2 * hitPointNormal.dot(ray.direction)), depth, Xi));
+		return hitShape.material.emission + color.mult(radiance(Ray(hitPoint, ray.direction - hitPointNormal * 2 * hitPointNormal.dot(ray.direction)), depth, Xi));
 	}
 	else { // REFR
 
@@ -211,7 +258,7 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
 		if (cos2t < 0)
 		{
-			return hitShape.emission + color.mult(radiance(reflectionRay, depth, Xi));
+			return hitShape.material.emission + color.mult(radiance(reflectionRay, depth, Xi));
 		}
 
 		// other wise, choose refraction or reflection using fresnel
@@ -236,15 +283,15 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		{
 			if (erand48(Xi) < p)
 			{
-				return hitShape.emission + radiance(reflectionRay, depth, Xi) * Rp;
+				return hitShape.material.emission + radiance(reflectionRay, depth, Xi) * Rp;
 			}
 			else
 			{
-				return hitShape.emission + radiance(Ray(hitPoint, refractionDir), depth, Xi) * Tp;
+				return hitShape.material.emission + radiance(Ray(hitPoint, refractionDir), depth, Xi) * Tp;
 			}
 		}
 		else {
-			return hitShape.emission + radiance(reflectionRay, depth, Xi) * Re + radiance(Ray(hitPoint, refractionDir), depth, Xi) * Tr;
+			return hitShape.material.emission + radiance(reflectionRay, depth, Xi) * Re + radiance(Ray(hitPoint, refractionDir), depth, Xi) * Tr;
 		}
 	}
 }

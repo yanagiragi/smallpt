@@ -14,7 +14,9 @@ class Model
 		std::vector<tinyobj::material_t> materials;
 		std::string err;
 		std::vector<Vec> positions;
+		std::vector<Vec> normals;
 		std::vector<Vec> texcoords;
+		bool hasUV;
 
 		Model(const char* filename)
 		{
@@ -24,58 +26,39 @@ class Model
 
 			for (size_t i = 0; i < shapes.size(); ++i)
 			{
-				bool hasUV = shapes[i].mesh.texcoords.size() > 0;
+				hasUV = shapes[i].mesh.texcoords.size() > 0;
+
+				//bool hasNormal = shapes[i].mesh.normals.size() > 0;
 
 				for (size_t f = 0; f < shapes[i].mesh.indices.size() / 3; f++) {
 
-					int indices0 = shapes[i].mesh.indices[f * 3 + 0];
-					int indices1 = shapes[i].mesh.indices[f * 3 + 1];
-					int indices2 = shapes[i].mesh.indices[f * 3 + 2];
-
-					Vec pos = Vec(
-						shapes[i].mesh.positions[indices0 * 3 + 0],
-						shapes[i].mesh.positions[indices0 * 3 + 1],
-						shapes[i].mesh.positions[indices0 * 3 + 2]
-					);
-					positions.push_back(pos);
-	
-					pos = Vec(
-						shapes[i].mesh.positions[indices1 * 3 + 0],
-						shapes[i].mesh.positions[indices1 * 3 + 1],
-						shapes[i].mesh.positions[indices1 * 3 + 2]
-					);
-					positions.push_back(pos);
-					
-					pos = Vec(
-						shapes[i].mesh.positions[indices2 * 3 + 0],
-						shapes[i].mesh.positions[indices2 * 3 + 1],
-						shapes[i].mesh.positions[indices2 * 3 + 2]
-					);
-					positions.push_back(pos);
-					
-
-					if(hasUV)
-					{
-						Vec uv = Vec(
-							shapes[i].mesh.texcoords[indices0 * 2 + 0],
-							shapes[i].mesh.texcoords[indices0 * 2 + 1],
-							0
+					for(int j = 0; j < 3; ++j){
+						int indices = shapes[i].mesh.indices[f * 3 + j];
+				
+						Vec pos = Vec(
+							shapes[i].mesh.positions[indices * 3 + 0],
+							shapes[i].mesh.positions[indices * 3 + 1],
+							shapes[i].mesh.positions[indices * 3 + 2]
 						);
-						texcoords.push_back(uv);
+						positions.push_back(pos);
 
-						uv = Vec(
-							shapes[i].mesh.texcoords[indices1 * 2 + 0],
-							shapes[i].mesh.texcoords[indices1 * 2 + 1],
-							0
+						Vec normal = Vec(
+							shapes[i].mesh.normals[indices * 3 + 0],
+							shapes[i].mesh.normals[indices * 3 + 1],
+							shapes[i].mesh.normals[indices * 3 + 2]
 						);
-						texcoords.push_back(uv);
+						// printf("%f %f %f\n", normal.x, normal.y, normal.z);
+						normals.push_back(normal);
 
-						uv = Vec(
-							shapes[i].mesh.texcoords[indices2 * 2 + 0],
-							shapes[i].mesh.texcoords[indices2 * 2 + 1],
-							0
-						);
-						texcoords.push_back(uv);
+						if(hasUV) {
+							Vec uv = Vec(
+								shapes[i].mesh.texcoords[indices * 2 + 0],
+								shapes[i].mesh.texcoords[indices * 2 + 1],
+								0
+							);
+							texcoords.push_back(uv);
+						}
+						
 					}
 				}
 			}

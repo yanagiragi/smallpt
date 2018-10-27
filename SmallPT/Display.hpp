@@ -30,8 +30,17 @@ static float GetRandom(unsigned int *seed0, unsigned int *seed1) {
 void UpdateRendering()
 {
 	if(globalConfig::currentSpp < globalConfig::limitSpp){
-		//if(currentSpp != 0)
-		//	SaveResult(modelName, width, height, currentSpp, output);
+		if(globalConfig::currentSpp != 0){
+			std::ostringstream outputFilenameStringStream;
+			outputFilenameStringStream << globalConfig::SaveImageNamePrefix << globalConfig::currentSpp << "spp";
+
+			std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
+			std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
+
+			// Save PPM
+			SavePPM(outputPpmFilename,globalConfig::width, globalConfig::height, globalConfig::output);
+		}
+		
         ++ globalConfig::currentSpp;
 	}
 	else{
@@ -124,7 +133,8 @@ void UpdateRendering()
 				}                                        
 
 				// flip Y for OpenGL Coordinate
-				const int j =  (y) * width + x;
+				// Now no flip ?
+				const int j =  y * width + x;
 				pixels[ j * channel + 0] = gammaCorrection(output[i].x);
 				pixels[ j * channel + 1] = gammaCorrection(output[i].y);
 				pixels[ j * channel + 2] = gammaCorrection(output[i].z);

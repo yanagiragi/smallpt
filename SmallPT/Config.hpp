@@ -47,7 +47,10 @@ namespace globalConfig
                 globalConfig::seeds[i] = 2;
         }
 
-        globalConfig::modelName = modelName;
+        if (strncmp(modelName, "null", 4) != 0)
+		    globalConfig::modelName = modelName;
+        else
+            globalConfig::modelName = "null";
 
         // Generate Filename
         std::string modelFileName(modelName);
@@ -65,9 +68,7 @@ namespace globalConfig
 
         SaveImageNamePrefix = outputFilenameStringStream.str();     
         
-        MainScene.LoadSphere();
-        MainScene.LoadModel(modelName);
-
+        MainScene.LoadScene();
     }
 
     void ReleaseConfig()
