@@ -73,22 +73,18 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 		if (Scene.intersect(Ray(hitPoint, l), t, id) && id == i) {
 			
 			double area = tri.Area();
-			//Vec outDirection = hitPoint- hitPointTri;//l.mult(Vec(-1, -1, -1));
-			Vec outDirection = l.mult(Vec(-1, -1, -1));
+			Vec outDirection = hitPoint- hitPointTri;//l.mult(Vec(-1, -1, -1));
+			//Vec outDirection = l.mult(Vec(-1, -1, -1));
 			double distance2 = l.dot(l);
 			
 			double cosArea = area * outDirection.dot(tri.normal);
 		
 			double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
-
 			
-			
-			omega = 1;// - distance2 / cosArea;
+			//omega = 1;// - distance2 / cosArea;
 
-			//printf("%f\n", omega);
-
-			//if(cosArea < 0)
-		 	//	continue;
+			if(cosArea < 0)
+		 		continue;
 
 			// calculating lighting and add to current value
 			e = e + color.mult(tri.material.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
