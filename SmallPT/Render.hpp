@@ -6,7 +6,7 @@
 
 #include "Config.hpp"
 
-Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
+Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
 {
 	//Sampling Lights, loop over any lights
 	Vec e;
@@ -50,6 +50,8 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 		}
 	}
 
+	//printf("%d (%f %f %f)\n", hitId, hitPoint.x, hitPoint.y, hitPoint.z);
+
 	// Sample Triangles	
 	for (int i = 0; i < Scene.Triangles.size(); ++i) {
 		const Triangle &tri = Scene.Triangles[i];
@@ -72,22 +74,41 @@ Vec SampleLights(Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned s
 		// shoot shadow ray
 		if (Scene.intersect(Ray(hitPoint, l), t, id) && id == i) {
 			
+			/*bool isTriangleHit = (id >= Scene.Spheres.size());
+			int hitId = isTriangleHit ? id - Scene.Spheres.size() : id;
+			
+			if(originalisTriangleHit && originalHitId == i){
+			printf("Occulded ");
+				continue;
+			}*/
+
 			double area = tri.Area();
 			Vec outDirection = hitPoint- hitPointTri;//l.mult(Vec(-1, -1, -1));
 			//Vec outDirection = l.mult(Vec(-1, -1, -1));
 			double distance2 = l.dot(l);
 			
+			Vec interpolatedNormal = (tri.n3 - tri.n1) * esp1 + (tri.n2 - tri.n1) * esp2 + tri.n1;
+
+			//double cosArea = area * outDirection.dot(interpolatedNormal);
 			double cosArea = area * outDirection.dot(tri.normal);
 		
 			double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
 			
-			//omega = 1;// - distance2 / cosArea;
+			omega *= pi;
 
+			omega = 1;
+
+			//omega = 1;// - distance2 / cosArea;
+			// l.dot(orientedHitPointNormal)
+
+			//printf("Hit\n");
 			if(cosArea < 0)
 		 		continue;
+			//printf("Hit\n");
 
 			// calculating lighting and add to current value
 			e = e + color.mult(tri.material.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+			// e = e + color.mult(tri.material.emission);// * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
 		}
 	}
 
@@ -220,7 +241,7 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		// since cos^2 + sin^2 = 1, last term = sqrt ( 1 - randomDistanceFromCenter ^ 2) = sqrt(1 - r2)
 		Vec d = (u * cos(r1) * randomDistanceFromCenter + v * sin(r1) * randomDistanceFromCenter + w * sqrt(1 - r2)).norm();
 
-		Vec e = SampleLights(hitPoint, orientedHitPointNormal, color, Xi);
+		Vec e = SampleLights(hitId, isTriangleHit, hitPoint, orientedHitPointNormal, color, Xi);
 
 		return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 

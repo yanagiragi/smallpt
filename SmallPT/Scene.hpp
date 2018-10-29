@@ -39,7 +39,8 @@ class Scene
 
 		Vec lightPos = Vec(50, 81.6 - 16.5, 81.6);
 		lightPos = Vec(50, 20, 81.6);
-		lightPos = Vec(50, 5, 81.6);
+//		lightPos = Vec(50, 10, 5);
+		lightPos = Vec(50, 10, 81.6);
 		Material lightMat(Vec(4, 4, 4) * 0.01, Vec(1, 1, 0), DIFF);
 		char* lightObj = "models/Plane.obj";
 		LoadModel(lightObj, lightMat, lightPos);

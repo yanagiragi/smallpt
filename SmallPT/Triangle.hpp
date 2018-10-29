@@ -8,7 +8,7 @@ class Triangle : public Shape
 {
 	public:
 
-		Vec p1, p2, p3, uv1, uv2, uv3, normal;
+		Vec p1, p2, p3, uv1, uv2, uv3, normal, n1, n2, n3;
 
 		bool hasUV;
 
@@ -21,10 +21,15 @@ class Triangle : public Shape
 		}
 
 		Triangle(Vec _p1, Vec _p2, Vec _p3, Vec _n1, Vec _n2, Vec _n3, bool _hasUV, Vec emi, Vec col, ReflectType mat) : 
-			p1(_p1), p2(_p2), p3(_p3), hasUV(_hasUV), Shape(emi, col, mat)
+			p1(_p1), p2(_p2), p3(_p3), hasUV(_hasUV), Shape(emi, col, mat), n1 (_n1), n2(_n2), n3(_n3)
 		{
+			Vec p1p2 = (_p1 - _p2);
+			Vec p1p3 = (_p1 - _p3);
+			Vec nn = (p1p2 % p1p3).norm();
 			//printf("%f %f %f, %f %f %f, %f %f %f\n",_n1.x, _n1.y, _n1.z, _n2.x, _n2.y, _n2.z, _n3.x, _n3.y, _n3.z);
 			normal = (_n1 + _n2 + _n3).norm();
+
+			printf("%f %f %f, %f %f %f\n",nn.x, nn.y, nn.z, normal.x, normal.y, normal.z);
 			
 			/*Vec p1p2 = (_p1 - _p2);
 			Vec p1p3 = (_p1 - _p3);
@@ -42,7 +47,7 @@ class Triangle : public Shape
 			// 1/2 * cross().length
 			Vec v1 = p2 - p1;
 			Vec v2 = p3 - p2;
-			return (v1 % v2).mag() / 2;
+			return (v1 % v2).mag() * 0.5;
 		}
 
 		double intersect(const Ray &r) const { // returns distance, 0 if nohit 
