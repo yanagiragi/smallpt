@@ -6,7 +6,7 @@
 
 #include "Config.hpp"
 
-Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
+Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec camRay, Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
 {
 	//Sampling Lights, loop over any lights
 	Vec e;
@@ -94,21 +94,34 @@ Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec hitPoint, Ve
 		
 			double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
 			
+			// 看起來應該要 * pi 把 reciprocalPi cancel 掉
 			omega *= pi;
 
-			omega = 1;
-
-			//omega = 1;// - distance2 / cosArea;
-			// l.dot(orientedHitPointNormal)
-
-			//printf("Hit\n");
 			if(cosArea < 0)
 		 		continue;
-			//printf("Hit\n");
+			
+			// ?: 
+			// l is parrellel to orirnetedHitPoointNormal
+			// since its should dot with ray from camera
+			//printf("%f\n", l.dot(camRay) * omega);
+			//printf("%f\n", omega);
 
 			// calculating lighting and add to current value
-			e = e + color.mult(tri.material.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
-			// e = e + color.mult(tri.material.emission);// * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+			
+			// 原始 Sphere 的版本
+			//e = e + color.mult(tri.material.emission * l.dot(camRay) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+			
+			// 發現 l.dot(orientedHitPointNormal) = 0 之後嘗試修改的版本
+			//e = e + color.mult(tri.material.emission * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+
+			// 顏色 * Emission
+			//e = e + color.mult(tri.material.emission) * 100;
+			
+			// 感覺 * 100 亮度沒有太大的變化？
+			//e = e + color * 100;
+
+			// 牆壁有紅藍顏色了
+			e = e + color;
 		}
 	}
 
@@ -241,7 +254,14 @@ Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive 
 		// since cos^2 + sin^2 = 1, last term = sqrt ( 1 - randomDistanceFromCenter ^ 2) = sqrt(1 - r2)
 		Vec d = (u * cos(r1) * randomDistanceFromCenter + v * sin(r1) * randomDistanceFromCenter + w * sqrt(1 - r2)).norm();
 
-		Vec e = SampleLights(hitId, isTriangleHit, hitPoint, orientedHitPointNormal, color, Xi);
+		//Vec e = SampleLights(hitId, isTriangleHit, ray.direction, hitPoint, orientedHitPointNormal, color, Xi);
+		Vec e = Vec(0,0,0);
+
+		Vec mask = Vec(1, 1, 1);
+
+		/*mask = mask * color;
+		mask = mask * d.dot(orientedHitPointNormal);
+		mask = mask * 2;*/
 
 		return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 

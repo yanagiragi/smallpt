@@ -35,8 +35,18 @@ int main(int argc, char **argv)
 		argv[2] // model loading name
 	);
 
-	SetupGlutDisplay(argc, argv);
-	glutMainLoop();
+	//SetupGlutDisplay(argc, argv);
+	//glutMainLoop();
+
+	UpdateRendering();
+	std::ostringstream outputFilenameStringStream;
+	outputFilenameStringStream << globalConfig::SaveImageNamePrefix << globalConfig::currentSpp << "spp";
+
+	std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
+	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
+
+	// Save PPM
+	SavePPM(outputPpmFilename,globalConfig::width, globalConfig::height, globalConfig::output);
 
 	globalConfig::ReleaseConfig();
 

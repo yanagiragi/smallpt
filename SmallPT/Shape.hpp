@@ -15,6 +15,8 @@ class Shape
 
 		Shape(Vec emi, Vec col, ReflectType refl) : 
 			material(emi, col, refl) {}
+		Shape(Material mat) : 
+			material(mat) {}
 };
 
 #endif // !SPHERE_HPP

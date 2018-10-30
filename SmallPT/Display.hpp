@@ -84,7 +84,7 @@ void UpdateRendering()
 				// for each pixel do 2x2 subsamples
 				for (int sy = 0; sy < 2; ++sy) {
 					for (int sx = 0; sx < 2; ++sx, r = Vec()) { // clear r				
-						//for (int s = 0; s < spp; ++s) {                                             
+						for (int s = 0; s < globalConfig::limitSpp; ++s) {                                             
 													/*const float r1 = GetRandom(&seeds[i2], &seeds[i2 + 1]) - .5f;
 													const float r2 = GetRandom(&seeds[i2], &seeds[i2 + 1]) - .5f;
 													const float kcx = (x + r1) * 1.0 / width - .5f;
@@ -116,8 +116,8 @@ void UpdateRendering()
 							Vec dir = cx * ((((sx * 0.5 + dx) / 2 + x) / width - 0.5)) + cy * ((((sy * 0.5 + dy) / 2 + y) / height - 0.5)) + Camera.direction;
 
 							// dir may need to normalize, however we force normalize when construct Ray
-							r = r + radiance(Ray(Camera.origin + dir * 140, dir.norm()), 0, Xi);// * (1.0 / spp);					
-						//}
+							r = r + radiance(Ray(Camera.origin + dir * 140, dir.norm()), 0, Xi) * (1.0 / spp);					
+						}
 							increment = increment + Vec(clamp(r.x), clamp(r.y), clamp(r.z))* .25; // average radiance, 0.25 for 2 sub spp
 					}
 				}
@@ -145,7 +145,7 @@ void UpdateRendering()
 }
 
 void idleFunc(void) {
-    UpdateRendering();        
+    // UpdateRendering();        
 	glutPostRedisplay();
 }
 

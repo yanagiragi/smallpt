@@ -20,20 +20,15 @@ class Triangle : public Shape
 			normal = (p1p2 % p1p3).norm();
 		}
 
-		Triangle(Vec _p1, Vec _p2, Vec _p3, Vec _n1, Vec _n2, Vec _n3, bool _hasUV, Vec emi, Vec col, ReflectType mat) : 
-			p1(_p1), p2(_p2), p3(_p3), hasUV(_hasUV), Shape(emi, col, mat), n1 (_n1), n2(_n2), n3(_n3)
+		Triangle(Vec _p1, Vec _p2, Vec _p3, Vec _n1, Vec _n2, Vec _n3, bool _hasUV, Material mat) : 
+			p1(_p1), p2(_p2), p3(_p3), hasUV(_hasUV), Shape(mat), n1 (_n1), n2(_n2), n3(_n3)
 		{
 			Vec p1p2 = (_p1 - _p2);
 			Vec p1p3 = (_p1 - _p3);
 			Vec nn = (p1p2 % p1p3).norm();
-			//printf("%f %f %f, %f %f %f, %f %f %f\n",_n1.x, _n1.y, _n1.z, _n2.x, _n2.y, _n2.z, _n3.x, _n3.y, _n3.z);
 			normal = (_n1 + _n2 + _n3).norm();
 
 			printf("%f %f %f, %f %f %f\n",nn.x, nn.y, nn.z, normal.x, normal.y, normal.z);
-			
-			/*Vec p1p2 = (_p1 - _p2);
-			Vec p1p3 = (_p1 - _p3);
-			normal = (p1p2 % p1p3).norm();*/
 		}
 
 		void SetUV(Vec _uv1, Vec _uv2, Vec _uv3)
