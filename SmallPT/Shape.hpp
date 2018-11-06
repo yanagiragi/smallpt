@@ -9,7 +9,9 @@ namespace smallPT
 {
 	class Shape
 	{
-	public:
+		public:
+
+		const double epsilon = 1e-4;
 
 		Material material;
 

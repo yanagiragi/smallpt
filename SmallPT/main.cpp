@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
 
 	// Save PPM
-	smallPT::SavePPM(outputPpmFilename, smallPT::output);
+	smallPT::SavePPM(outputPpmFilename, smallPT::width, smallPT::height, smallPT::output);
 
 	smallPT::ReleaseConfig();
 

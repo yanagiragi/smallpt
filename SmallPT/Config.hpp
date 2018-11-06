@@ -33,7 +33,6 @@ namespace smallPT
     // static unsigned int *seeds;
 
 	// thresholds & constants
-	const double epsilon = 1e-4;
 	const double pi = 3.1415926535;
 	const double reciprocalPi = 1 / pi;
 

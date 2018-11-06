@@ -32,7 +32,7 @@ namespace smallPT {
 	inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
 	inline double gammaCorrection(double x) { return pow(clamp(x), 1 / 2.2); }
 
-	void SavePPM(std::string outputFileName, Vec *outputData)
+	void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 	{
 		FILE *f = fopen(outputFileName.c_str(), "w");
 		fprintf(f, "P3\n%d %d\n%d\n", width, height, 255); // store value in [0, 255]
@@ -56,23 +56,23 @@ namespace smallPT {
 	//	}
 	//}
 
-	void SaveResult()
-	{
-		// Generate Filename
-		std::ostringstream outputFilenameStringStream;
-		outputFilenameStringStream << SaveImageNamePrefix << currentSpp << "spp";
+	//void SaveResult()
+	//{
+	//	// Generate Filename
+	//	std::ostringstream outputFilenameStringStream;
+	//	outputFilenameStringStream << SaveImageNamePrefix << currentSpp << "spp";
 
-		std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
-		std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
+	//	std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
+	//	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
 
-		// Save PPM
-		SavePPM(outputPpmFilename, output);
+	//	// Save PPM
+	//	SavePPM(outputPpmFilename, output);
 
-		// Save PNG
-		//cv::Mat Image(height, width, CV_8UC3);
-		//ConvertPpmToMat(width, height, ppmData, Image);
-		//cv::imwrite(outputPngFilename, Image);
-	}
+	//	// Save PNG
+	//	//cv::Mat Image(height, width, CV_8UC3);
+	//	//ConvertPpmToMat(width, height, ppmData, Image);
+	//	//cv::imwrite(outputPngFilename, Image);
+	//}
 
 	//cv::Mat LoadImage(const std::string &filename)
 	//{

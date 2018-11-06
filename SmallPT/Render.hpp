@@ -9,22 +9,6 @@
 
 namespace smallPT
 {
-	static float GetRandom(unsigned int *seed0, unsigned int *seed1) {
-		*seed0 = 36969 * ((*seed0) & 65535) + ((*seed0) >> 16);
-		*seed1 = 18000 * ((*seed1) & 65535) + ((*seed1) >> 16);
-
-		unsigned int ires = ((*seed0) << 16) + (*seed1);
-
-		/* Convert to float */
-		union {
-			float f;
-			unsigned int ui;
-		} res;
-		res.ui = (ires & 0x007fffff) | 0x40000000;
-
-		return (res.f - 2.f) / 2.f;
-	}
-
 	Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec camRay, Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
 	{
 		//Sampling Lights, loop over any lights
@@ -356,7 +340,7 @@ namespace smallPT
 			mask = mask * d.dot(orientedHitPointNormal);
 			mask = mask * 2;*/
 
-			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
+			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
 			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
 			//return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 
