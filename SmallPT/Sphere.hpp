@@ -2,9 +2,9 @@
 #define SPHERE_HPP
 
 #include "Shape.hpp"
-
-class Sphere : public Shape
-{
+namespace smallPT {
+	class Sphere : public Shape
+	{
 	public:
 
 		double radius;
@@ -12,7 +12,7 @@ class Sphere : public Shape
 		Vec origin;
 
 
-		Sphere(double rad, Vec ori, Vec emi, Vec col, ReflectType mat) : radius(rad), origin(ori), Shape(emi, col, mat){}
+		Sphere(double rad, Vec ori, Vec emi, Vec col, ReflectType mat) : radius(rad), origin(ori), Shape(emi, col, mat) {}
 
 		double intersect_old(const Ray &ray) const
 		{
@@ -24,22 +24,22 @@ class Sphere : public Shape
 			double c = (ray.origin - origin).dot(ray.origin - origin) - radius * radius;
 
 			if ((b * b - 4.0 * a * c) < 0) // not intersected
-				return 0; 
+				return 0;
 
 			// solve sphere intersection equation, ans = (-b +- sqrt(b^2 - 4ac)) / 2a
 			double t1 = (-1.0 * b + sqrt(b * b - 4.0 * a * c)) / (2.0 * a);
 			double t2 = (-1.0 * b - sqrt(b * b - 4.0 * a * c)) / (2.0 * a);
 
-			return t1 > epsilon ? t1 
-								: (t2 > epsilon) ? t2 : 0;
+			return t1 > epsilon ? t1
+				: (t2 > epsilon) ? t2 : 0;
 		}
 
 		double intersect(const Ray &r) const { // returns distance, 0 if nohit 
 			Vec op = origin - r.origin; // Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0 
 			double t, eps = 1e-4, b = op.dot(r.direction), det = b*b - op.dot(op) + radius*radius;
-			if (det<0) return 0; else det = sqrt(det);
-			return (t = b - det)>eps ? t : ((t = b + det)>eps ? t : 0);
+			if (det < 0) return 0; else det = sqrt(det);
+			return (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
 		}
-};
-
+	};
+}
 #endif // !SPHERE_HPP

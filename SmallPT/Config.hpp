@@ -7,50 +7,59 @@
 #include "Vec.hpp"
 //#include "Scene.hpp"
 
-namespace globalConfig
+namespace smallPT
 {   
-    float *pixels;
+	// GLfloat[3 * width * height] for glut display
+	// not exactly same to output
+	// short speaking , pixels = flipCoordinate(gammaCorrection(output))
+	float *pixels;
+	int channel = 3;
     
+	// Vec[width * height] for path tracing results
     Vec *output;
 
-    int width;
-    int height;
-    int limitSpp = 4;
+	// resolution settings
+    int width, height;
 
-    int channel = 3;
+	// max spp
+    int limitSpp = 4;
     int currentSpp = 0;
     
     Scene MainScene = Scene();
     
     char *modelName;
-
     std::string SaveImageNamePrefix;
 
-    static unsigned int *seeds;
+    // static unsigned int *seeds;
 
-    bool InitConfig(int width, int height, int spp, char *modelName)
+	// thresholds & constants
+	const double epsilon = 1e-4;
+	const double pi = 3.1415926535;
+	const double reciprocalPi = 1 / pi;
+
+    void InitConfig(int w, int h, int spp, char *modelName)
     {
-        globalConfig::width = width;
-        globalConfig::height = height;
-        globalConfig::limitSpp = spp > 1 ? spp : 0;
+        width = w;
+        height = h;
+        limitSpp = spp > 1 ? spp : 0;
         
-        globalConfig::pixels = new float [ width * height * channel];
+        pixels = new float [ width * height * channel];
         for(int i = 0; i < width * height * channel; ++i)
     		pixels[i] = 0;
         
-        globalConfig::output = new Vec[width * height];
+        output = new Vec[width * height];
 
-        globalConfig::seeds = new unsigned int[width * height * channel * 2];
+        /*seeds = new unsigned int[width * height * channel * 2];
         for (int i = 0; i < width * height * channel * 2; ++i) {
-            globalConfig::seeds[i] = rand();
-            if (globalConfig::seeds[i] < 2)
-                globalConfig::seeds[i] = 2;
-        }
+            seeds[i] = rand();
+            if (seeds[i] < 2)
+                seeds[i] = 2;
+        }*/
 
         if (strncmp(modelName, "null", 4) != 0)
-		    globalConfig::modelName = modelName;
+		    modelName = modelName;
         else
-            globalConfig::modelName = "null";
+            modelName = "null";
 
         // Generate Filename
         std::string modelFileName(modelName);
@@ -73,9 +82,9 @@ namespace globalConfig
 
     void ReleaseConfig()
     {
-        free(globalConfig::pixels);
-        free(globalConfig::output);
-        free(globalConfig::seeds);
+        free(pixels);
+        free(output);
+        // free(seeds);
     }
 }
 

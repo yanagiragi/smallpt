@@ -5,18 +5,20 @@
 #include "Vec.hpp"
 #include "Material.hpp"
 
-const double epsilon = 1e-4;
-
-class Shape
+namespace smallPT
 {
+	class Shape
+	{
 	public:
 
 		Material material;
 
-		Shape(Vec emi, Vec col, ReflectType refl) : 
+		Shape(Vec emi, Vec col, ReflectType refl) :
 			material(emi, col, refl) {}
-		Shape(Material mat) : 
+		Shape(Material mat) :
 			material(mat) {}
-};
+	};
+
+}
 
 #endif // !SPHERE_HPP

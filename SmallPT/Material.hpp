@@ -3,23 +3,28 @@
 
 #include "Vec.hpp"
 
-enum ReflectType
+namespace smallPT
 {
-	DIFF, SPEC, REFR
-};
 
-class Material
-{
-    public:
-    
-    Vec emission;
+	enum ReflectType
+	{
+		DIFF, SPEC, REFR
+	};
 
-    Vec color;
+	class Material
+	{
+	public:
 
-    ReflectType reflectType;
+		Vec emission;
 
-    Material(Vec emi, Vec col, ReflectType refl) : 
-        emission(emi), color(col), reflectType(refl) {}
-};
+		Vec color;
+
+		ReflectType reflectType;
+
+		Material(Vec emi, Vec col, ReflectType refl) :
+			emission(emi), color(col), reflectType(refl) {}
+	};
+
+}
 
 #endif

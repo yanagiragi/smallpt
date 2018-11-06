@@ -14,41 +14,42 @@
 
 #include "Config.hpp"
 
-void sigintHandler(int arg) {
-   if( SIGINT == arg )
-   {
-      printf("\ninterrupted\n");
-	  globalConfig::ReleaseConfig();
-      exit( 0 );
-   }
+void sigintHandler(int arg) 
+{
+	if (SIGINT == arg)
+	{
+		printf("\ninterrupted\n");
+		smallPT::ReleaseConfig();
+		exit(0);
+	}
 }
 
 
 int main(int argc, char **argv)
 {
-	signal( SIGINT, sigintHandler );
+	signal(SIGINT, sigintHandler);
 
-	globalConfig::InitConfig(
+	smallPT::InitConfig(
 		800, // width
 		600, // height
 		atoi(argv[1]), // spp
 		argv[2] // model loading name
 	);
 
-	//SetupGlutDisplay(argc, argv);
-	//glutMainLoop();
+	//	SetupGlutDisplay(argc, argv);
+	//	glutMainLoop();
 
-	UpdateRendering();
+	smallPT::UpdateRendering();
 	std::ostringstream outputFilenameStringStream;
-	outputFilenameStringStream << globalConfig::SaveImageNamePrefix << globalConfig::currentSpp << "spp";
+	outputFilenameStringStream << smallPT::SaveImageNamePrefix << smallPT::limitSpp << "spp";
 
 	std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
 	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
 
 	// Save PPM
-	SavePPM(outputPpmFilename,globalConfig::width, globalConfig::height, globalConfig::output);
+	smallPT::SavePPM(outputPpmFilename, smallPT::output);
 
-	globalConfig::ReleaseConfig();
+	smallPT::ReleaseConfig();
 
 	return 0;
 }

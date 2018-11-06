@@ -2,11 +2,12 @@
 #define RAY_HPP
 
 #include "Vec.hpp"
+namespace smallPT
+{
+	class Ray {
 
-class Ray {
-	
 	public:
-		
+
 		Vec origin, direction;
 
 		Ray(Vec ori, Vec dir)
@@ -14,6 +15,8 @@ class Ray {
 			origin = ori;
 			direction = dir;
 		}
-};
+	};
+
+}
 
 #endif // !RAY_HPP
