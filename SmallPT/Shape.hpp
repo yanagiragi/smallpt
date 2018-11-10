@@ -11,7 +11,7 @@ namespace smallPT
 	{
 		public:
 
-		const double epsilon = 1e-4;
+		static const double epsilon = 1e-4;
 
 		Material material;
 

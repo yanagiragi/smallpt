@@ -53,7 +53,10 @@ namespace smallPT
 			}
 		}
 
-		//printf("%d (%f %f %f)\n", hitId, hitPoint.x, hitPoint.y, hitPoint.z);
+		bool sampleTriangle = false;
+
+		if(sampleTriangle == false)
+			return e;
 
 		// Sample Triangles	
 		for (int i = 0; i < Scene.Triangles.size(); ++i) {
@@ -131,77 +134,6 @@ namespace smallPT
 		}
 
 		return e;
-	}
-
-
-	Vec radiance2(const Ray &r, int depth, unsigned short *Xi) {
-
-		Scene Scene = MainScene;
-
-		double t;                               // distance to intersection
-		int id = 0;                               // id of intersected object
-		if (!Scene.intersect(r, t, id))
-			return Vec(); // if miss, return black
-		const Sphere &obj = Scene.Spheres[id];        // the hit object
-
-		Vec x = r.origin + r.direction*t;
-		Vec n = (x - obj.origin).norm();
-		Vec nl = n.dot(r.direction) < 0 ? n : n * -1;
-		Vec f = obj.material.color;
-
-		double p = f.x>f.y && f.x>f.z ? f.x : f.y>f.z ? f.y : f.z; // max refl
-
-		if (++depth>5)
-			if (erand48(Xi)<p) f = f * (1 / p);
-			else
-				return obj.material.emission; //R.R.
-
-		if (depth > 10)
-			return obj.material.emission;
-
-		if (obj.material.reflectType == DIFF) {                  // Ideal DIFFUSE reflection
-			double r1 = 2 * pi *erand48(Xi);
-			double r2 = erand48(Xi);
-			double r2s = sqrt(r2);
-
-			Vec w = nl, u = ((fabs(w.x)>.1 ? Vec(0, 1) : Vec(1)) % w).norm();
-			Vec v = w % u;
-
-			// next camera ray's direction
-			Vec d = (u*cos(r1)*r2s + v * sin(r1)*r2s + w * sqrt(1 - r2)).norm();
-
-			//Vec e = SampleLights(id, false, r.direction, x, nl, obj.material.color, Xi);
-
-			// f = obj.c;
-			return obj.material.emission + f.mult(radiance2(Ray(x, d), depth, Xi));
-		}
-
-		else if (obj.material.reflectType == SPEC) {
-			// Ideal SPECULAR reflection
-			return obj.material.emission + f.mult(radiance2(Ray(x, r.direction - n * 2 * n.dot(r.direction)), depth, Xi));
-		}
-
-		// REFL
-		Ray reflRay(x, r.direction - n * 2 * n.dot(r.direction));     // Ideal dielectric REFRACTION
-		bool into = n.dot(nl)>0;                // Ray from outside going in?
-
-		double nc = 1, nt = 1.5, nnt = into ? nc / nt : nt / nc, ddn = r.direction.dot(nl), cos2t;
-		if ((cos2t = 1 - nnt * nnt*(1 - ddn * ddn))<0)    // Total internal reflection
-			return obj.material.emission + f.mult(radiance2(reflRay, depth, Xi));
-
-		Vec tdir = (r.direction *nnt - n * ((into ? 1 : -1)*(ddn*nnt + sqrt(cos2t)))).norm();
-
-		double a = nt - nc, b = nt + nc, R0 = a * a / (b*b), c = 1 - (into ? -ddn : tdir.dot(n));
-
-		double Re = R0 + (1 - R0)*c*c*c*c*c;
-		double Tr = 1 - Re;
-		double P = .25 + .5*Re;
-		double RP = Re / P;
-		double TP = Tr / (1 - P);
-
-		return obj.material.emission + f.mult(depth>2 ? (erand48(Xi)<P ?   // Russian roulette
-			radiance2(reflRay, depth, Xi)*RP : radiance2(Ray(x, tdir), depth, Xi)*TP) :
-			radiance2(reflRay, depth, Xi)*Re + radiance2(Ray(x, tdir), depth, Xi)*Tr);
 	}
 
 	Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive = 1) {
@@ -329,19 +261,12 @@ namespace smallPT
 			// (cos term, sin term, last term), last term = sqrt(1 - (cos term)^2 + (sin term)^ 2)
 			// since cos^2 + sin^2 = 1, last term = sqrt ( 1 - randomDistanceFromCenter ^ 2) = sqrt(1 - r2)
 			Vec d = (u * cos(r1) * randomDistanceFromCenter + v * sin(r1) * randomDistanceFromCenter + w * sqrt(1 - r2)).norm();
-
+			
 			Vec e = SampleLights(hitId, isTriangleHit, ray.direction, hitPoint, orientedHitPointNormal, color, Xi);
-			//Vec e = Vec(0,0,0);
-
-			//Vec mask = Vec(1, 1, 1);
-			/*mask = mask * color;
-			mask = mask * d.dot(orientedHitPointNormal);
-			mask = mask * 2;*/
-
+			
+			//return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
 			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
 			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
-			//return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
-
 		}
 		else if (hitShape.material.reflectType == SPEC)
 		{
@@ -530,8 +455,6 @@ namespace smallPT
 
 		fprintf(stderr, "\n");
 	}
-
-
 }
 
 #endif // !_RENDER_HPP
