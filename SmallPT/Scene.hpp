@@ -49,7 +49,7 @@ namespace smallPT {
 			Material lightMat(emi, col, DIFF);
 
 			char* lightObj = "models/Plane.obj";
-			LoadModel(lightObj, lightMat, lightPos);
+			// LoadModel(lightObj, lightMat, lightPos);
 			// Almost equalilent to
 			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); //6.Lite
 
@@ -68,11 +68,11 @@ namespace smallPT {
 			Spheres.push_back(Sphere(1e5, Vec(50, -1e5 + 81.6, 81.6), Vec(), Vec(.75, .75, .75), DIFF)); //5.Top
 
 			// For Testing
-			//Spheres.push_back(Sphere(0.05, Vec(50, 81.6, 81.6), Vec(4, 4, 4) * 100000, Vec(), DIFF)); //6.Lite
+			// Spheres.push_back(Sphere(0.05, Vec(50, 81.6, 81.6), Vec(4, 4, 4) * 100000, Vec(), DIFF)); //6.Lite
 
 			Spheres.push_back(Sphere(16.5, Vec(27, 16.5, 47), Vec(), Vec(1, 1, 1)*.999, DIFF)); //7.Mirr
 
-																								// Original
+			// Original
 			Spheres.push_back(Sphere(1.5, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 100, Vec(), DIFF)); //6.Lite
 
 			// hard shadow

@@ -97,7 +97,7 @@ namespace smallPT
 
 				double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
 
-																				 // 看起來應該要 * pi 把 reciprocalPi cancel 掉
+				// 看起來應該要 * pi 把 reciprocalPi cancel 掉
 				omega *= pi;
 
 				if (cosArea < 0)
@@ -204,10 +204,9 @@ namespace smallPT
 			radiance2(reflRay, depth, Xi)*Re + radiance2(Ray(x, tdir), depth, Xi)*Tr);
 	}
 
-
-	// Xi: Random number seed
 	Vec radiance(const Ray &ray, int depth, unsigned short *Xi, int includeEmissive = 1) {
-
+		
+		// Xi: Random number seed
 		Scene Scene = MainScene;
 
 		double t;
@@ -334,14 +333,13 @@ namespace smallPT
 			Vec e = SampleLights(hitId, isTriangleHit, ray.direction, hitPoint, orientedHitPointNormal, color, Xi);
 			//Vec e = Vec(0,0,0);
 
-			Vec mask = Vec(1, 1, 1);
-
+			//Vec mask = Vec(1, 1, 1);
 			/*mask = mask * color;
 			mask = mask * d.dot(orientedHitPointNormal);
 			mask = mask * 2;*/
 
 			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
-			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
+			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 			//return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 
 		}
@@ -449,11 +447,11 @@ namespace smallPT
 
 		Vec r; // used for colors of samples
 
-			   // set 6 threads
+		// set 6 threads
 		omp_set_num_threads(6);
 
-		#pragma omp parallel for schedule(dynamic, 1) private(r)
 		// start ray tracing
+		#pragma omp parallel for schedule(dynamic, 1) private(r)		
 		for (int y = 0; y < height; ++y) {
 			fprintf(stderr, "\r Rendering (%d spp) %5.2f%%", spp, 100.0 * y / (height - 1));
 
