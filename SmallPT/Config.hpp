@@ -27,7 +27,7 @@ namespace smallPT
     
     Scene MainScene = Scene();
     
-    char *modelName;
+    std::string modelName;
     std::string SaveImageNamePrefix;
 
     // static unsigned int *seeds;
@@ -36,7 +36,7 @@ namespace smallPT
 	const double pi = 3.1415926535;
 	const double reciprocalPi = 1 / pi;
 
-    void InitConfig(int w, int h, int spp, char *modelName)
+    void InitConfig(int w, int h, int spp, char *_modelName)
     {
         width = w;
         height = h;
@@ -55,10 +55,10 @@ namespace smallPT
                 seeds[i] = 2;
         }*/
 
-        if (strncmp(modelName, "null", 4) != 0)
-		    modelName = modelName;
+        if (strncmp(_modelName, "null", 4) != 0)
+		    modelName = std::string(_modelName);
         else
-            modelName = "null";
+            modelName = std::string("null");
 
         // Generate Filename
         std::string modelFileName(modelName);

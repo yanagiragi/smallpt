@@ -48,12 +48,12 @@ namespace smallPT
 			if (Scene.intersect(Ray(hitPoint, l), t, id) && id == i) {
 				double omega = 2 * pi * (1 - cos_a_max); // 1/probability with respect to solid angle
 
-														 // calculating lighting and add to current value
+				// calculating lighting and add to current value
 				e = e + color.mult(s.material.emission * l.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
 			}
 		}
 
-		bool sampleTriangle = false;
+		bool sampleTriangle = true;
 
 		if(sampleTriangle == false)
 			return e;
@@ -73,63 +73,35 @@ namespace smallPT
 			double esp1 = 1 - su0;
 			double esp2 = (1 - u2) * su0;
 
-			Vec hitPointTri = (tri.p3 - tri.p1) * esp1 + (tri.p2 - tri.p1) * esp2 + tri.p1;
-			//Vec hitPointTri = tri.p1 * esp1 + tri.p2 * esp2 + tri.p3 * (1 - esp1 - esp2);
-			Vec l = hitPointTri - hitPoint;
+			//Vec triangleSamplePoint = tri.p1 * esp1 + tri.p2 * esp2 + tri.p3 * (1 - esp1 - esp2);
+			Vec triangleSamplePoint = (tri.p3 - tri.p1) * esp1 + (tri.p2 - tri.p1) * esp2 + tri.p1;
+			Vec interpolatedNormal = (tri.n3 - tri.n1) * esp1 + (tri.n2 - tri.n1) * esp2 + tri.n1;
+			interpolatedNormal = interpolatedNormal.norm();
+			
+			Vec secondDirection = triangleSamplePoint - hitPoint;
+
+			double area = tri.Area();
+			Vec outDirection = secondDirection.mult(Vec(-1, -1, -1)).norm();
+			double distance2 = secondDirection.dot(secondDirection);
+
+			double cosArea = area * outDirection.dot(interpolatedNormal);
+			
+			//double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
+			double omega = cosArea / distance2; // 1 / probability
+
+			// 看起來應該要 * pi 把 reciprocalPi cancel 掉
+			omega *=  pi;
+
+			// normalized the direction to make "secondDirection.dot(orientedHitPointNormal)" correct
+			secondDirection.norm();
+
+			if (cosArea < 0)
+				continue;
 
 			// shoot shadow ray
-			if (Scene.intersect(Ray(hitPoint, l), t, id) && id == i) {
+			if (Scene.intersect(Ray(hitPoint, secondDirection), t, id) && id == i + Scene.Spheres.size()) {
 
-				/*bool isTriangleHit = (id >= Scene.Spheres.size());
-				int hitId = isTriangleHit ? id - Scene.Spheres.size() : id;
-
-				if(originalisTriangleHit && originalHitId == i){
-				printf("Occulded ");
-				continue;
-				}*/
-
-				double area = tri.Area();
-				Vec outDirection = hitPoint - hitPointTri;//l.mult(Vec(-1, -1, -1));
-														  //Vec outDirection = l.mult(Vec(-1, -1, -1));
-				double distance2 = l.dot(l);
-
-				Vec interpolatedNormal = (tri.n3 - tri.n1) * esp1 + (tri.n2 - tri.n1) * esp2 + tri.n1;
-
-				//double cosArea = area * outDirection.dot(interpolatedNormal);
-				double cosArea = area * outDirection.dot(tri.normal);
-
-				double omega = cosArea / (distance2 >= 1e-6 ? distance2 : 1e-6); // 1 / probability
-
-				// 看起來應該要 * pi 把 reciprocalPi cancel 掉
-				omega *= pi;
-
-				if (cosArea < 0)
-					continue;
-
-				// ?: 
-				// l is parrellel to orirnetedHitPoointNormal
-				// since its should dot with ray from camera
-				//printf("%f\n", l.dot(camRay) * omega);
-				//printf("%f\n", omega);
-
-				// calculating lighting and add to current value
-
-				// 原始 Sphere 的版本
-				//e = e + color.mult(tri.material.emission * l.dot(camRay) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
-
-				// 發現 l.dot(orientedHitPointNormal) = 0 之後嘗試修改的版本
-				//e = e + color.mult(tri.material.emission * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
-
-				// 顏色 * Emission
-				//e = e + color.mult(tri.material.emission) * 100;
-
-				// 感覺 * 100 亮度沒有太大的變化？
-				//e = e + color * 100;
-
-				// 牆壁有紅藍顏色了
-				e = e + color;
-
-				//e = e + color * omega;
+				e = e + color.mult(tri.material.emission * secondDirection.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
 			}
 		}
 
@@ -264,9 +236,9 @@ namespace smallPT
 			
 			Vec e = SampleLights(hitId, isTriangleHit, ray.direction, hitPoint, orientedHitPointNormal, color, Xi);
 			
-			//return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
-			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
-			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
+			// return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
+			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
+			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 		}
 		else if (hitShape.material.reflectType == SPEC)
 		{

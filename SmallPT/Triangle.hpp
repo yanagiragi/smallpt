@@ -29,7 +29,7 @@ namespace smallPT {
 			Vec nn = (p1p2 % p1p3).norm();
 			normal = (_n1 + _n2 + _n3).norm();
 
-			printf("%f %f %f, %f %f %f\n", nn.x, nn.y, nn.z, normal.x, normal.y, normal.z);
+			// printf("%f %f %f, %f %f %f\n", nn.x, nn.y, nn.z, normal.x, normal.y, normal.z);
 		}
 
 		void SetUV(Vec _uv1, Vec _uv2, Vec _uv3)

@@ -32,25 +32,25 @@ namespace smallPT {
 
 			Material SimpleDiffuseMat(Vec(), Vec(.999, .999, .999), DIFF);
 			//char* testModel = "models/bunnyLowWithUV.obj";
-			char* testModel = "null";
+			const std::string testModel("null");
 			//char* testModel  = "models/Plane.obj";
 			//bunnyPos = Vec(50, 20, 81.6);
 
-			if (strncmp(testModel, "null", 4) != 0)
-				LoadModel(testModel, SimpleDiffuseMat, bunnyPos);
+			if (testModel != "null")
+				LoadModel(testModel.c_str(), SimpleDiffuseMat, bunnyPos);
 
 			Vec lightPos = Vec(50, 81.6 - 16.5, 81.6);
 			//lightPos = Vec(50, 20, 81.6);
-			lightPos = Vec(50, 30, 81.6);
+			// lightPos = Vec(50, 30, 81.6);
 			//		lightPos = Vec(50, 10, 5);
-			//lightPos = Vec(50, 10, 81.6);
+			lightPos = Vec(50, 10, 81.6);
 
 			Vec emi = Vec(4, 4, 4);
 			Vec col = Vec(1, 1, 1);
 			Material lightMat(emi, col, DIFF);
 
-			char* lightObj = "models/Plane.obj";
-			LoadModel(lightObj, lightMat, lightPos);
+			const std::string lightObj("models/Plane.obj");
+			LoadModel(lightObj.c_str(), lightMat, lightPos);
 			// Almost equalilent to
 			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); //6.Lite
 
@@ -61,6 +61,7 @@ namespace smallPT {
 		// Defined Functions	
 		void LoadSphere()
 		{
+			// Sphere(double rad, Vec ori, Vec emi, Vec col, ReflectType mat)
 			Spheres.push_back(Sphere(1e5, Vec(1e5 + 1, 40.8, 81.6), Vec(), Vec(.75, .25, .25), DIFF)); //0.Left
 			Spheres.push_back(Sphere(1e5, Vec(-1e5 + 99, 40.8, 81.6), Vec(), Vec(.25, .25, .75), DIFF)); //1.Rght
 			Spheres.push_back(Sphere(1e5, Vec(50, 40.8, 1e5), Vec(), Vec(.75, .75, .75), DIFF)); //2.Back
@@ -69,9 +70,9 @@ namespace smallPT {
 			Spheres.push_back(Sphere(1e5, Vec(50, -1e5 + 81.6, 81.6), Vec(), Vec(.75, .75, .75), DIFF)); //5.Top
 
 			// For Testing
-			// Spheres.push_back(Sphere(0.05, Vec(50, 81.6, 81.6), Vec(4, 4, 4) * 100000, Vec(), DIFF)); //6.Lite
+			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); //6.Lite
 
-			Spheres.push_back(Sphere(16.5, Vec(27, 16.5, 47), Vec(), Vec(1, 1, 1)*.999, DIFF)); //7.Mirr
+			// Spheres.push_back(Sphere(16.5, Vec(27, 16.5, 47), Vec(), Vec(1, 1, 1)*.999, DIFF)); //7.Mirr
 
 			// Original
 			// Spheres.push_back(Sphere(1.5, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 100, Vec(), DIFF)); //6.Lite
