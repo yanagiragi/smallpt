@@ -21,12 +21,16 @@ namespace smallPT
 
 		// Sample Spheres
 		for (int i = 0; i < Scene.Spheres.size(); ++i) {
+
+			if(i == originalHitId)
+				continue;
+
 			const Sphere &s = Scene.Spheres[i];
 
 			if (s.material.emission.x <= 0 && s.material.emission.y <= 0 && s.material.emission.z <= 0)
 				continue; // skip non-lights
 
-						  // create random direction towards sphere
+			// create random direction towards sphere
 			Vec sw = s.origin - hitPoint;
 			Vec su = ((fabs(sw.x) > 0.1 ? Vec(0, 1) : Vec(1)) % sw).norm();
 			Vec sv = sw % su;
@@ -60,6 +64,10 @@ namespace smallPT
 
 		// Sample Triangles	
 		for (int i = 0; i < Scene.Triangles.size(); ++i) {
+
+			if((i + Scene.Spheres.size()) == originalHitId)
+				continue;
+
 			const Triangle &tri = Scene.Triangles[i];
 
 			if (tri.material.emission.x <= 0 && tri.material.emission.y <= 0 && tri.material.emission.z <= 0)

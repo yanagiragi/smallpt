@@ -76,7 +76,7 @@ namespace smallPT
 
         SaveImageNamePrefix = outputFilenameStringStream.str();     
         
-        MainScene.LoadScene();
+        MainScene.LoadScene(modelName);
     }
 
     void ReleaseConfig()

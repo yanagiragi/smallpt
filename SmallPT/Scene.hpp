@@ -18,6 +18,13 @@ namespace smallPT {
 		std::vector<Triangle> Triangles;
 		// std::vector<cv::Mat> Textures;
 
+		std::string m_modelName;
+		void LoadScene(std::string modelName)
+		{
+			m_modelName = modelName;
+			LoadScene();
+		}
+
 		void LoadScene()
 		{
 			// always load sphere before loading model
@@ -27,23 +34,18 @@ namespace smallPT {
 			double y = 1;
 			double z = 30;
 
-			//obj.translate(Vec(50 + x, y, z));
-			Vec bunnyPos = Vec(50, 0, 81.6);
+			Vec bunnyPos = Vec(50, -1, 81.6);
 
 			Material SimpleDiffuseMat(Vec(), Vec(.999, .999, .999), DIFF);
-			//char* testModel = "models/bunnyLowWithUV.obj";
-			const std::string testModel("null");
-			//char* testModel  = "models/Plane.obj";
-			//bunnyPos = Vec(50, 20, 81.6);
-
-			if (testModel != "null")
-				LoadModel(testModel.c_str(), SimpleDiffuseMat, bunnyPos);
+			
+			if (m_modelName != "null")
+				LoadModel(m_modelName.c_str(), SimpleDiffuseMat, bunnyPos);
 
 			Vec lightPos = Vec(50, 81.6 - 16.5, 81.6);
 			//lightPos = Vec(50, 20, 81.6);
 			// lightPos = Vec(50, 30, 81.6);
 			//		lightPos = Vec(50, 10, 5);
-			lightPos = Vec(50, 10, 81.6);
+			lightPos = Vec(50, 40, 51.6);
 
 			Vec emi = Vec(4, 4, 4);
 			Vec col = Vec(1, 1, 1);
@@ -75,7 +77,7 @@ namespace smallPT {
 			// Spheres.push_back(Sphere(16.5, Vec(27, 16.5, 47), Vec(), Vec(1, 1, 1)*.999, DIFF)); //7.Mirr
 
 			// Original
-			// Spheres.push_back(Sphere(1.5, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 100, Vec(), DIFF)); //6.Lite
+			Spheres.push_back(Sphere(1.5, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 100, Vec(), DIFF)); //6.Lite
 
 			// hard shadow
 			// Spheres.push_back(Sphere(0.05, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 100000, Vec(), DIFF)); //6.Lite
