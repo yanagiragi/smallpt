@@ -34,6 +34,7 @@ namespace smallPT {
 
 	void SavePPM(std::string outputFileName, int width, int height, Vec *outputData)
 	{
+		printf("save %s\n", outputFileName.c_str());
 		FILE *f = fopen(outputFileName.c_str(), "w");
 		fprintf(f, "P3\n%d %d\n%d\n", width, height, 255); // store value in [0, 255]
 		for (int i = 0; i < width * height; ++i) {

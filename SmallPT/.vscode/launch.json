@@ -4,12 +4,13 @@
         // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
         "version": "0.2.0",
         "configurations": [
+
                 {
                         "name": "(gdb) Launch",
                         "type": "cppdbg",
                         "request": "launch",
                         "program": "${workspaceFolder}/pt_cpu",
-                        "args": [ "4", "models/bunnyLowWithUV.obj" ],
+                        "args": [ "2", "models/bunnyLowWithUV.obj" ],
                         "stopAtEntry": false,
                         "cwd": "${workspaceFolder}",
                         "environment": [],

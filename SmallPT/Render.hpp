@@ -9,6 +9,8 @@
 
 namespace smallPT
 {
+	Texture Tex = Texture("Untitled.png");
+
 	Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec camRay, Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
 	{
 		//Sampling Lights, loop over any lights
@@ -177,14 +179,39 @@ namespace smallPT
 
 			if (tri.hasUV) {
 				int texId = 0;
-				/*int w = Scene.Textures[texId].cols;
-				int h = Scene.Textures[texId].rows;
-				cv::Mat tex = Scene.Textures[texId];
+				/*int w = Textures[texId].cols;
+				int h = Textures[texId].rows;
+				cv::Mat tex = Textures[texId];
 				color = Vec(
 				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
 				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
 				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
 				);*/
+
+				int useVersion = -1;
+				if(useVersion == 2){				
+					int w = Tex.width;
+					int h = Tex.height;
+					int c = Tex.comp;
+					// (0, 0) starts for top-left corner
+					int indexX = (int)(uv.x * w);
+					int indexY = (int)((1 - uv.y) * h) - 1;
+					int index = c * w * indexY + c * indexX;
+					
+					if(index > w * h * c || index < 0){
+						printf("index = %d\n", index);
+						printf("uv = %f %f\n", uv.x, uv.y);
+					}
+					
+					color = Vec(
+						Tex.image[index + 0] / 255.0,
+						Tex.image[index + 1] / 255.0,
+						Tex.image[index + 2] / 255.0
+					);
+				}
+				else{
+					color = hitShape.material.color;
+				}
 			}
 			else {
 				color = hitShape.material.color;
@@ -192,7 +219,7 @@ namespace smallPT
 
 			// TODO: wierd uv interpolation?
 			// use hitShape.color instead for now.
-			color = hitShape.material.color;
+			// color = hitShape.material.color;
 		}
 		else {
 			// no uv support for sphere for now
@@ -213,6 +240,8 @@ namespace smallPT
 
 		if (depth > MAX_DEPTH)
 			return hitShape.material.emission;
+
+		// return color;
 
 		if (hitShape.material.reflectType == DIFF)
 		{
@@ -353,7 +382,7 @@ namespace smallPT
 		Vec r; // used for colors of samples
 
 		// set 6 threads
-		omp_set_num_threads(6);
+		//omp_set_num_threads(6);
 
 		// start ray tracing
 		#pragma omp parallel for schedule(dynamic, 1) private(r)		

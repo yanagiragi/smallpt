@@ -11,6 +11,8 @@ namespace smallPT {
 
 		Vec p1, p2, p3, uv1, uv2, uv3, normal, n1, n2, n3;
 
+		// tinyobj::material_t objMaterial;
+
 		bool hasUV;
 
 		Triangle(Vec _p1, Vec _p2, Vec _p3, bool _hasUV, Vec emi, Vec col, ReflectType mat) :
