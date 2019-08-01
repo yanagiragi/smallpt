@@ -345,6 +345,4 @@ pt_cpu
 models
 
 # image folder
-*.ppm
-*.png
-*.jpg
+SmallPT/images
