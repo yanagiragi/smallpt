@@ -30,11 +30,13 @@ namespace smallPT
     std::string modelName;
     std::string SaveImageNamePrefix;
 
+    const int OMP_threads = 7;
+
     // static unsigned int *seeds;
 
 	// thresholds & constants
 	const double pi = 3.1415926535;
-	const double reciprocalPi = 1 / pi;
+	const double reciprocalPi = 1 / pi;		
 
     void InitConfig(int w, int h, int spp, char *_modelName)
     {

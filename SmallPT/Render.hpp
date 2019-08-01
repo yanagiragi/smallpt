@@ -9,7 +9,8 @@
 
 namespace smallPT
 {
-	Texture Tex = Texture("Untitled.png");
+	// For Texture Testing
+	// Texture Tex = Texture("Untitled.png");
 
 	Vec SampleLights(int originalHitId, bool originalisTriangleHit, Vec camRay, Vec hitPoint, Vec orientedHitPointNormal, Vec color, unsigned short *Xi)
 	{
@@ -110,8 +111,7 @@ namespace smallPT
 
 			// shoot shadow ray
 			if (Scene.intersect(Ray(hitPoint, secondDirection), t, id) && id == i + Scene.Spheres.size()) {
-
-				e = e + color.mult(tri.material.emission * secondDirection.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for BRDF Energy equals 1
+				e = e + color.mult(tri.material.emission * secondDirection.dot(orientedHitPointNormal) * omega) * reciprocalPi; // 1/pi for energy conservation
 			}
 		}
 
@@ -127,13 +127,16 @@ namespace smallPT
 		int id = 0;
 		int MAX_DEPTH = 10;
 
-		if (!Scene.intersect(ray, t, id))	// miss, return black color
+		if (!Scene.intersect(ray, t, id)){ 
+			// miss, return black color
 			return Vec();
+		}
 
 		Vec origin;
 
 		bool isTriangleHit = (id >= Scene.Spheres.size());
 
+		// remapping hitId since we store sphere id first
 		int hitId = isTriangleHit ? id - Scene.Spheres.size() : id;
 		Shape &hitShape = isTriangleHit ? (Shape&)(Scene.Triangles[hitId]) : (Shape&)(Scene.Spheres[hitId]);
 
@@ -179,20 +182,26 @@ namespace smallPT
 
 			if (tri.hasUV) {
 				int texId = 0;
-				/*int w = Textures[texId].cols;
-				int h = Textures[texId].rows;
-				cv::Mat tex = Textures[texId];
-				color = Vec(
-				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
-				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
-				tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
-				);*/
+				/*
+					// pixel color getter using openCV2
+					int w = Textures[texId].cols;
+					int h = Textures[texId].rows;
+					cv::Mat tex = Textures[texId];
+					color = Vec(
+						tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[0] / 255.0,
+						tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[1] / 255.0,
+						tex.at<cv::Vec3b>(uv.x * w, uv.y * h)[2] / 255.0
+					);
+				*/
 
+				// TODO: wierd uv interpolation?
+				// use hitShape.color instead for now
 				int useVersion = -1;
 				if(useVersion == 2){				
-					int w = Tex.width;
+					/*int w = Tex.width;
 					int h = Tex.height;
 					int c = Tex.comp;
+
 					// (0, 0) starts for top-left corner
 					int indexX = (int)(uv.x * w);
 					int indexY = (int)((1 - uv.y) * h) - 1;
@@ -207,7 +216,7 @@ namespace smallPT
 						Tex.image[index + 0] / 255.0,
 						Tex.image[index + 1] / 255.0,
 						Tex.image[index + 2] / 255.0
-					);
+					);*/
 				}
 				else{
 					color = hitShape.material.color;
@@ -216,10 +225,6 @@ namespace smallPT
 			else {
 				color = hitShape.material.color;
 			}
-
-			// TODO: wierd uv interpolation?
-			// use hitShape.color instead for now.
-			// color = hitShape.material.color;
 		}
 		else {
 			// no uv support for sphere for now
@@ -261,8 +266,6 @@ namespace smallPT
 
 			// create orthonormal coordinate frame (w,u,v)
 			Vec w = orientedHitPointNormal;
-			/*glm::vec3 u = glm::normalize(glm::cross(fabs(w.x) > 0.1 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0), w));
-			glm::vec3 v = glm::normalize(glm::cross(u, w));*/
 			Vec u = ((fabs(w.x) > 0.1 ? Vec(0, 1) : Vec(1)) % w).norm();
 			Vec v = w % u;
 
@@ -273,18 +276,15 @@ namespace smallPT
 			
 			Vec e = SampleLights(hitId, isTriangleHit, ray.direction, hitPoint, orientedHitPointNormal, color, Xi);
 			
-			// return hitShape.material.emission * includeEmissive + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
-			//return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 1));
 			return hitShape.material.emission * includeEmissive + e + color.mult(radiance(Ray(hitPoint, d), depth, Xi, 0));
 		}
-		else if (hitShape.material.reflectType == SPEC)
-		{
+		else if (hitShape.material.reflectType == SPEC) {
 			return hitShape.material.emission + color.mult(radiance(Ray(hitPoint, ray.direction - hitPointNormal * 2 * hitPointNormal.dot(ray.direction)), depth, Xi));
 		}
-		else { // REFR
+		else {
 
-			   // Glass: Reflect & Refract
-
+			// reflectType: REFR
+			// Glass: Reflect & Refract
 			Ray reflectionRay(hitPoint, ray.direction - hitPointNormal * 2 * hitPointNormal.dot(ray.direction));
 
 			bool into = hitPointNormal.dot(orientedHitPointNormal) > 0; // ray should going in?
@@ -292,17 +292,17 @@ namespace smallPT
 			double nc = 1; // c is the speed of light in vacuum
 			double nt = 1.5; // t is the phase velocity of light in the medium
 
-							 // refractiveIndex, glass IOR ~= 1.5
-							 // Check: https://en.wikipedia.org/wiki/Crown_glass_(optics)
-							 // Not account for dispersion (to account these, vary index by wavelength)
+			// refractiveIndex, glass IOR ~= 1.5
+			// Check: https://en.wikipedia.org/wiki/Crown_glass_(optics)
+			// Not account for dispersion (to account these, vary index by wavelength)
 			double nnt = into ? nc / nt : nt / nc;
 
 			double ddn = ray.direction.dot(orientedHitPointNormal);
 			double cos2t; // cos(sida_b)
 
-						  // if total internel reflection, reflect
-						  // happens when angle is too shallow
-						  // cos2t = cos(sida_b) ^ 2
+			// if total internel reflection, reflect
+			// happens when angle is too shallow
+			// cos2t = cos(sida_b) ^ 2
 			cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
 			if (cos2t < 0)
 			{
@@ -346,31 +346,7 @@ namespace smallPT
 
 	void UpdateRendering()
 	{
-		if (currentSpp < limitSpp) {
-			if (currentSpp != 0) {
-				std::ostringstream outputFilenameStringStream;
-				outputFilenameStringStream << SaveImageNamePrefix << currentSpp << "spp";
-
-				std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
-				std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
-
-				// Save PPM
-				SavePPM(outputPpmFilename, width, height, output);
-			}
-
-			++currentSpp;
-		}
-		else {
-			return;
-		}
-
-		//const int spp = currentSpp;
-		const int spp = limitSpp;
-		/*const int width = width;
-		const int height = height;
-		const int channel = channel;
-		Vec* output = output;
-		float* pixels = pixels;*/
+		const int spp = ++currentSpp;
 
 		Ray Camera(Vec(50.0, 52.0, 295.6), Vec(0.0, -0.042612, -1.0));
 
@@ -382,7 +358,7 @@ namespace smallPT
 		Vec r; // used for colors of samples
 
 		// set 6 threads
-		//omp_set_num_threads(6);
+		omp_set_num_threads(OMP_threads);
 
 		// start ray tracing
 		#pragma omp parallel for schedule(dynamic, 1) private(r)		
@@ -403,14 +379,6 @@ namespace smallPT
 				for (int sy = 0; sy < 2; ++sy) {
 					for (int sx = 0; sx < 2; ++sx, r = Vec()) { // clear r				
 						for (int s = 0; s < spp; ++s) {
-							/*const float r1 = GetRandom(&seeds[i2], &seeds[i2 + 1]) - .5f;
-							const float r2 = GetRandom(&seeds[i2], &seeds[i2 + 1]) - .5f;
-							const float kcx = (x + r1) * 1.0 / width - .5f;
-							const float kcy = (y + r2) * 1.0 / height - .5f;
-
-							Vec dir = cx * kcx + cy * kcy + Camera.direction;*/
-
-
 							double r1 = 2 * erand48(Xi); // r1 in [0, 2)
 							double dx = r1 < 1 ? sqrt(r1) - 1 : 1 - sqrt(2 - r1);
 
@@ -434,27 +402,16 @@ namespace smallPT
 							Vec dir = cx * ((((sx * 0.5 + dx) / 2 + x) / width - 0.5)) + cy * ((((sy * 0.5 + dy) / 2 + y) / height - 0.5)) + Camera.direction;
 
 							// dir may need to normalize, however we force normalize when construct Ray
-							// r = r + radiance(Ray(Camera.origin + dir * 140, dir.norm()), 0, Xi) * (1.0 / spp);					
 							r = r + radiance(Ray(Camera.origin + dir * 140, dir.norm()), 0, Xi) * (1.0 / spp);
 						}
 						increment = increment + Vec(clamp(r.x), clamp(r.y), clamp(r.z))* .25; // average radiance, 0.25 for 2 sub spp
 					}
 				}
 
-				// normalize color if progressive
-				/*const float k1 = spp;
-				const float k2 = 1.f / (k1 + 1.f);
-				if(spp == 1){
-				output[i] = increment;
-				}
-				else{
-				output[i] = (output[i] * k1 + increment) * k2;
-				} */
-
+				// update pixel value
 				output[i] = increment;
 
 				// flip Y for OpenGL Coordinate
-				// Now no flip ?
 				const int j = y * width + x;
 				pixels[j * channel + 0] = gammaCorrection(output[i].x);
 				pixels[j * channel + 1] = gammaCorrection(output[i].y);
@@ -463,6 +420,15 @@ namespace smallPT
 		}
 
 		fprintf(stderr, "\n");
+		
+		std::ostringstream outputFilenameStringStream;
+		outputFilenameStringStream << SaveImageNamePrefix << spp << "spp";
+
+		std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
+		std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
+
+		// Save PPM
+		SavePPM(outputPpmFilename, width, height, output);
 	}
 }
 

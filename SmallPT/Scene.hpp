@@ -63,24 +63,28 @@ namespace smallPT {
 				LoadModel("models/haku/mouth.obj", MouthMat, bunnyPos);
 				LoadModel("models/haku/shoe.obj", DressMat, bunnyPos);
 			}
-			else if (m_modelName != "null")
+			else if (m_modelName == "bunny") {
+				Material SimpleReflMat(Vec(), Vec(1,1,1)*.999, SPEC);
+				Material SimpleRefrMat(Vec(), Vec(1,1,1)*.999, REFR);
+				LoadModel("models/bunnyLow.obj", SimpleReflMat, Vec(27,0,47));
+				LoadModel("models/bunnyLow.obj", SimpleRefrMat, Vec(73,0,78));
+				SaveImageNamePrefix = std::string("bunny");
+			}
+			else if (m_modelName != "null") {
 				LoadModel(m_modelName.c_str(), SimpleDiffuseMat, bunnyPos);
+			}
 			
-			Vec lightPos = Vec(50, 81.6 - 16.5, 81.6);
-			// lightPos = Vec(50, 20, 81.6);
-			// lightPos = Vec(50, 30, 81.6);
-			// lightPos = Vec(50, 10, 5);
-			lightPos = Vec(50, 81.3, 81.6);
-
+			Vec lightPos = Vec(50, 81.3, 81.6);
 			Vec emi = Vec(4, 4, 4);
 			Vec col = Vec(1, 1, 1);
 			Material lightMat(emi, col, DIFF);
 
-			const std::string lightObj("models/HoriPlaneLarge.obj");
-			LoadModel(lightObj.c_str(), lightMat, lightPos);
+			// Polygon Area light
 			// Almost equalilent to
-			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); //6.Lite
-
+			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); // 6.Lite
+			const std::string lightObj("models/HoriPlaneLarge.obj");
+			LoadModel(lightObj.c_str(), lightMat, lightPos);			
+			
 			printf(" Sphere\t = %d\n", (int)Spheres.size());
 			printf(" Triangle = %d\n", (int)Triangles.size());
 		}
@@ -98,7 +102,6 @@ namespace smallPT {
 
 			// For Testing
 			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); //6.Lite
-
 			// Spheres.push_back(Sphere(16.5, Vec(27, 16.5, 47), Vec(), Vec(1, 1, 1)*.999, DIFF)); //7.Mirr
 
 			// Original
@@ -110,8 +113,8 @@ namespace smallPT {
 			// soft shadow
 			// Spheres.push_back(Sphere(12, Vec(50, 81.6 - 16.5, 81.6), Vec(4, 4, 4) * 2, Vec(), DIFF)); //6.Lite
 
-			//Spheres.push_back(Sphere(16.5,Vec(27,16.5,47),			Vec(),			Vec(1,1,1)*.999,	SPEC)); //7.Mirr
-			//Spheres.push_back(Sphere(16.5,Vec(73,16.5,78),			Vec(),			Vec(1,1,1)*.999,	REFR)); //8.Glas
+			// Spheres.push_back(Sphere(16.5,Vec(27,16.5,47),			Vec(),			Vec(1,1,1)*.999,	SPEC)); //7.Mirr
+			// Spheres.push_back(Sphere(16.5,Vec(73,16.5,78),			Vec(),			Vec(1,1,1)*.999,	REFR)); //8.Glas
 
 		}
 

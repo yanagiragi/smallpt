@@ -17,7 +17,9 @@
 namespace smallPT {
 	
 	void idleFunc(void) {
-		// UpdateRendering();        
+		if (currentSpp < limitSpp) {
+			UpdateRendering();
+		}
 		glutPostRedisplay();
 	}
 
@@ -30,11 +32,13 @@ namespace smallPT {
 
 	void reshapeFunc(int newWidth, int newHeight) {
 		// no reshape!
-		/*globalConfig::width = newWidth;
-		globalConfig::height = newHeight;
-		glViewport(0, 0, globalConfig::width, globalConfig::height);
-		glLoadIdentity();
-		glutPostRedisplay();*/
+		/*
+			globalConfig::width = newWidth;
+			globalConfig::height = newHeight;
+			glViewport(0, 0, globalConfig::width, globalConfig::height);
+			glLoadIdentity();
+			glutPostRedisplay();
+		*/
 	}
 
 	void SetupGlutDisplay(int argc, char **argv)
@@ -49,9 +53,6 @@ namespace smallPT {
 		glutReshapeFunc(reshapeFunc);
 		glutDisplayFunc(displayFunc);
 		glutIdleFunc(idleFunc);
-
-		//glutKeyboardFunc(keyFunc);
-		//glutSpecialFunc(specialFunc);
 	}
 
 }

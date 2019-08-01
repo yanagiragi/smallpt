@@ -32,22 +32,20 @@ int main(int argc, char **argv)
 	smallPT::InitConfig(
 		800, // width
 		600, // height
-		atoi(argv[1]), // spp
-		argv[2] // model loading name
+		atoi(argv[2]), // spp
+		argv[3] // model loading name
 	);
 
-	//	SetupGlutDisplay(argc, argv);
-	//	glutMainLoop();
-
-	smallPT::UpdateRendering();
-	std::ostringstream outputFilenameStringStream;
-	outputFilenameStringStream << smallPT::SaveImageNamePrefix << smallPT::limitSpp << "spp";
-
-	std::string outputPpmFilename = outputFilenameStringStream.str() + ".ppm";
-	std::string outputPngFilename = outputFilenameStringStream.str() + ".png";
-
-	// Save PPM
-	smallPT::SavePPM(outputPpmFilename, smallPT::width, smallPT::height, smallPT::output);
+	if (std::string(argv[1]) == "glut") {
+		smallPT::SetupGlutDisplay(argc, argv);
+		glutMainLoop();
+	}
+	else {
+		// std::string(argv[1]) == "console"
+		while (smallPT::currentSpp < smallPT::limitSpp) {
+			smallPT::UpdateRendering();	
+		}
+	}
 
 	smallPT::ReleaseConfig();
 

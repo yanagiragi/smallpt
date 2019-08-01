@@ -49,7 +49,6 @@ namespace smallPT {
 		}
 
 		double intersect(const Ray &r) const { // returns distance, 0 if nohit 
-
 			//#ifdef MOLLER_TRUMBORE
 			Vec p1p2 = p2 - p1;
 			Vec p1p3 = p3 - p1;

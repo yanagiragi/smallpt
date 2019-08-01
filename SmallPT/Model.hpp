@@ -49,7 +49,7 @@ namespace smallPT
 
 			void LoadMaterial(const char* filename)
 			{
-				printf("Found %d Materials\n",  materials.size());
+				printf("Found %d Materials\n",  (int)(materials.size()));
 				
 				// Load diffuse textures
 				{
@@ -91,50 +91,6 @@ namespace smallPT
 						}
 					}
 				}
-			}
-
-			void LoadModelOld(const char* filename)
-			{
-				/*bool result = tinyobj::LoadObj(shapes, materials, err, filename);
-
-				for (size_t i = 0; i < shapes.size(); ++i)
-				{
-					hasUV = shapes[i].mesh.texcoords.size() > 0;
-
-					//bool hasNormal = shapes[i].mesh.normals.size() > 0;
-
-					for (size_t f = 0; f < shapes[i].mesh.indices.size() / 3; f++) {
-
-						for (int j = 0; j < 3; ++j) {
-							int indices = shapes[i].mesh.indices[f * 3 + j];
-
-							Vec pos = Vec(
-								shapes[i].mesh.positions[indices * 3 + 0],
-								shapes[i].mesh.positions[indices * 3 + 1],
-								shapes[i].mesh.positions[indices * 3 + 2]
-							);
-							positions.push_back(pos);
-
-							Vec normal = Vec(
-								shapes[i].mesh.normals[indices * 3 + 0],
-								shapes[i].mesh.normals[indices * 3 + 1],
-								shapes[i].mesh.normals[indices * 3 + 2]
-							);
-							// printf("%f %f %f\n", normal.x, normal.y, normal.z);
-							normals.push_back(normal);
-
-							if (hasUV) {
-								Vec uv = Vec(
-									shapes[i].mesh.texcoords[indices * 2 + 0],
-									shapes[i].mesh.texcoords[indices * 2 + 1],
-									0
-								);
-								texcoords.push_back(uv);
-							}
-
-						}
-					}
-				}*/
 			}
 
 			Model(const char* filename)
